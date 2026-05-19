@@ -1,4 +1,4 @@
-// ===== FUNKCJE PRZYNALEŻNOŚCI =====
+// FUNKCJE PRZYNALEŻNOŚCI
 export function triangle(x, a, b, c) {
   if (x <= a || x >= c) return 0;
   if (x == b) return 1;
@@ -113,7 +113,7 @@ export function step(timeStep) {
     let bad = Math.max(rule1, rule2, rule3, rule4, rule5, rule6);
 
     // DECYZJA
-    let change = -bad * 20 + 1; // kara + regeneracja
+    let change = -bad * 10 + 1; // kara + regeneracja
 
     health += change;
     health = Math.max(0, Math.min(100, health));
