@@ -1,111 +1,137 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Smart Doniczka - Gra Fuzzy</title>
+<style>
+  body {
+    font-family: Arial;
+    text-align: center;
+    transition: background 1s;
+  }
+  .card {
+    background: white;
+    padding: 20px;
+    margin: 20px auto;
+    width: 300px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  button {
+    margin: 5px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+  }
+</style>
+</head>
 
+<body>
+
+<h1>🌱 Smart Doniczka (Fuzzy Game)</h1>
+
+<div class="card">
+  <p>Godzina: <span id="time">8</span>:00</p>
+  <p>Zdrowie rośliny: <span id="health">80</span>%</p>
+
+  <p>Wilgotność gleby: <span id="soilVal">50</span></p>
+  <input type="range" id="soil" min="0" max="100" value="50">
+
+  <p>Światło: <span id="lightVal">50</span></p>
+  <input type="range" id="light" min="0" max="100" value="50">
+
+  <p>Temperatura: <span id="tempVal">20</span>°C</p>
+  <input type="range" id="temp" min="0" max="40" value="20">
+
+  <br><br>
+
+  <button onclick="water()">💧 Podlej</button>
+  <button onclick="lamp()">💡 Światło</button>
+  <button onclick="step()">⏭️ Następny krok</button>
+
+  <p id="msg"></p>
+</div>
+
+<script>
+
+// ===== FUNKCJE ROZMYTE =====
 function triangle(x, a, b, c) {
-  return Math.max(Math.min((x - a) / (b - a), (c - x) / (c - b)), 0);
+  return Math.max(Math.min((x-a)/(b-a), (c-x)/(c-b)), 0);
 }
 
-export default function SmartPotGame() {
-  const [time, setTime] = useState(8);
-  const [soil, setSoil] = useState(50);
-  const [light, setLight] = useState(50);
-  const [health, setHealth] = useState(80);
-  const [message, setMessage] = useState("");
+// ===== STAN =====
+let time = 8;
+let health = 80;
 
-  const dayLight = triangle(time, 6, 12, 18);
-  const night = 1 - dayLight;
+// ===== AKTUALIZACJA =====
+function updateUI() {
+  document.getElementById("time").innerText = time;
+  document.getElementById("health").innerText = health;
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime((t) => (t + 1) % 24);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+  document.getElementById("soilVal").innerText = soil.value;
+  document.getElementById("lightVal").innerText = light.value;
+  document.getElementById("tempVal").innerText = temp.value;
 
-  function calculate() {
-    const dry = triangle(soil, 0, 0, 40);
-    const wet = triangle(soil, 60, 80, 100);
-
-    let waterNeed = dry * 100;
-
-    let healthChange = 0;
-
-    if (soil < 30) healthChange -= 10;
-    if (soil > 80) healthChange -= 5;
-    if (light < 30 && dayLight > 0.5) healthChange -= 10;
-    if (light > 70 && night > 0.5) healthChange -= 5;
-
-    setHealth((h) => Math.max(0, Math.min(100, h + healthChange)));
-
-    if (waterNeed > 60) {
-      setMessage("Roślina jest spragniona 💧");
-    } else if (wet > 0.5) {
-      setMessage("Za dużo wody!");
-    } else {
-      setMessage("Warunki są OK ✅");
-    }
-  }
-
-  function waterPlant() {
-    setSoil((s) => Math.min(100, s + 20));
-  }
-
-  function addLight() {
-    setLight((l) => Math.min(100, l + 20));
-  }
-
-  const bgColor = dayLight > 0.5 ? "bg-yellow-200" : "bg-blue-900";
-
-  return (
-    <div className={`min-h-screen p-6 ${bgColor}`}>
-      <Card className="max-w-xl mx-auto rounded-2xl shadow-xl">
-        <CardContent className="p-6 space-y-4">
-          <h1 className="text-xl font-bold">🌱 Smart Doniczka - Mini Gra</h1>
-
-          <p>Godzina: {time}:00</p>
-
-          <p>Zdrowie rośliny: {health}%</p>
-
-          <div>
-            <p>Wilgotność gleby: {soil}</p>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={soil}
-              onChange={(e) => setSoil(parseInt(e.target.value))}
-            />
-          </div>
-
-          <div>
-            <p>Światło: {light}</p>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={light}
-              onChange={(e) => setLight(parseInt(e.target.value))}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={waterPlant}>Podlej 💧</Button>
-            <Button onClick={addLight}>Dodaj światło 💡</Button>
-            <Button onClick={calculate}>Sprawdź stan</Button>
-          </div>
-
-          <motion.div
-            animate={{ scale: health / 100 + 0.5 }}
-            className="text-6xl text-center"
-          >
-            🌿
-          </motion.div>
-
-          <p className="text-center">{message}</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  // dzień / noc
+  let day = triangle(time, 6, 12, 18);
+  document.body.style.background = day > 0.5 ? "#f7e9a0" : "#1e2a5a";
 }
+
+// ===== GRA + FUZZY =====
+function step() {
+
+  let s = parseInt(soil.value);
+  let l = parseInt(light.value);
+  let t = parseInt(temp.value);
+
+  // fuzzification
+  let dry = triangle(s, 0, 0, 40);
+  let wet = triangle(s, 60, 80, 100);
+
+  let cold = triangle(t, 0, 0, 15);
+  let hot = triangle(t, 25, 35, 40);
+
+  let dark = triangle(l, 0, 0, 30);
+  let bright = triangle(l, 60, 80, 100);
+
+  let day = triangle(time, 6, 12, 18);
+  let night = 1 - day;
+
+  // ===== REGUŁY FUZZY =====
+  let bad1 = Math.min(dry, hot);          // sucho + gorąco
+  let bad2 = Math.min(wet, cold);         // mokro + zimno
+  let bad3 = Math.min(dark, day);         // brak światła w dzień
+  let bad4 = Math.min(bright, night);     // za jasno w nocy
+
+  let bad = Math.max(bad1, bad2, bad3, bad4);
+
+  // wpływ na zdrowie
+  let change = -bad * 20 + 2; // lekka regeneracja
+
+  health += change;
+
+  if (health > 100) health = 100;
+  if (health < 0) health = 0;
+
+  // wiadomość
+  if (bad > 0.6) {
+    msg.innerText = "❗ Warunki złe!";
+  } else if (bad > 0.3) {
+    msg.innerText = "⚠️ Uważaj na roślinę";
+  } else {
+    msg.innerText = "✅ Roślina ma się dobrze";
+  }
+
+  // czas płynie
+  time = (time + 1) % 24;
+
+  updateUI();
+
+  if (health <= 0) {
+    alert("Roślina umarła 😢");
+  }
+}
+
+// ===== AKCJE GRY =====
+function water() {
