@@ -1,5 +1,5 @@
 // FUNKCJE PRZYNALEŻNOŚCI
-export function triangle(x, a, b, c) {
+function triangle(x, a, b, c) {
   if (x <= a || x >= c) return 0;
   if (x == b) return 1;
   if (x > a && x < b) return (x - a) / (b - a);
@@ -16,6 +16,115 @@ const soil = document.getElementById("soil");
 const light = document.getElementById("light");
 const temp = document.getElementById("temp");
 const msg = document.getElementById("msg");
+const chartVarSelect = document.getElementById("chartVar");
+const fuzzySoilChart = document.getElementById("fuzzySoil");
+const fuzzyLightChart = document.getElementById("fuzzyLight");
+const fuzzyTempChart = document.getElementById("fuzzyTemp");
+
+// PARAMETRY ROŚLIN
+const plantFuzzyConfig = {
+  storczyk: {
+    soil: {
+      xMax: 100,
+      sets: [
+        [0, 0, 40],
+        [30, 50, 70],
+        [60, 80, 100],
+      ],
+      labels: ["Suche", "Optymalne", "Mokre"],
+      title: "Wilgotność gleby",
+    },
+    light: {
+      xMax: 100,
+      sets: [
+        [0, 0, 30],
+        [20, 50, 80],
+        [60, 80, 100],
+      ],
+      labels: ["Ciemne", "Optymalne", "Jasne"],
+      title: "Światło",
+    },
+    temp: {
+      xMax: 40,
+      sets: [
+        [0, 0, 15],
+        [10, 20, 30],
+        [25, 35, 40],
+      ],
+      labels: ["Zimno", "Optymalne", "Gorąco"],
+      title: "Temperatura",
+    },
+  },
+  kaktus: {
+    soil: {
+      xMax: 100,
+      sets: [
+        [0, 0, 20],
+        [10, 30, 50],
+        [40, 60, 100],
+      ],
+      labels: ["Suche", "Optymalne", "Mokre"],
+      title: "Wilgotność gleby",
+    },
+    light: {
+      xMax: 100,
+      sets: [
+        [0, 0, 50],
+        [40, 70, 100],
+        [80, 90, 100],
+      ],
+      labels: ["Ciemne", "Optymalne", "Jasne"],
+      title: "Światło",
+    },
+    temp: {
+      xMax: 50,
+      sets: [
+        [0, 0, 20],
+        [15, 25, 35],
+        [30, 40, 50],
+      ],
+      labels: ["Zimno", "Optymalne", "Gorąco"],
+      title: "Temperatura",
+    },
+  },
+  paprotka: {
+    soil: {
+      xMax: 100,
+      sets: [
+        [0, 0, 60],
+        [50, 70, 90],
+        [80, 90, 100],
+      ],
+      labels: ["Suche", "Optymalne", "Mokre"],
+      title: "Wilgotność gleby",
+    },
+    light: {
+      xMax: 100,
+      sets: [
+        [0, 0, 20],
+        [10, 40, 70],
+        [60, 80, 100],
+      ],
+      labels: ["Ciemne", "Optymalne", "Jasne"],
+      title: "Światło",
+    },
+    temp: {
+      xMax: 50,
+      sets: [
+        [0, 0, 18],
+        [15, 25, 35],
+        [30, 40, 50],
+      ],
+      labels: ["Zimno", "Optymalne", "Gorąco"],
+      title: "Temperatura",
+    },
+  },
+};
+
+soil.addEventListener("input", updateUI);
+light.addEventListener("input", updateUI);
+temp.addEventListener("input", updateUI);
+chartVarSelect?.addEventListener("change", updateUI);
 
 // UI
 function updateUI() {
@@ -28,67 +137,39 @@ function updateUI() {
 
   // Dzień / noc
   let day = triangle(time, 6, 12, 18);
-  document.body.style.background = day > 0.3 ? "#73abc1" : "#31374e";
+  //document.body.style.background = day > 0.3 ? "#73abc1" : "#57657b";
+
+  drawFuzzyChart();
 }
 
 // Parametry w doniczce
-export function step(timeStep) {
+function step(timeStep) {
   for (let i = 0; i < timeStep; i++) {
     let s = parseInt(soil.value); // wilgotność gleby
     let l = parseInt(light.value); // światło
     let t = parseInt(temp.value); // temperatura
 
     // FUZZIFICATION
-    /*
-    if (plant == "storczyk") {
-      let soilDry = triangle(s, 0, 0, 40);
-      let soilOptimal = triangle(s, 30, 50, 70);
-      let soilWet = triangle(s, 60, 80, 100);
+    let soilDry, soilOptimal, soilWet;
+    let tempCold, tempOptimal, tempHot;
+    let lightDark, lightOptimal, lightBright;
 
-      let tempCold = triangle(t, 0, 0, 15);
-      let tempOptimal = triangle(t, 10, 20, 30);
-      let tempHot = triangle(t, 25, 35, 40);
+    const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
+    const soilSets = plantConfig.soil.sets;
+    const tempSets = plantConfig.temp.sets;
+    const lightSets = plantConfig.light.sets;
 
-      let lightDark = triangle(l, 0, 0, 30);
-      let lightOptimal = triangle(l, 20, 50, 80);
-      let lightBright = triangle(l, 60, 80, 100);
-    } else if (plant == "kaktus") {
-      let soilDry = triangle(s, 0, 0, 20);
-      let soilOptimal = triangle(s, 10, 30, 50);
-      let soilWet = triangle(s, 40, 60, 100);
+    soilDry = triangle(s, ...soilSets[0]);
+    soilOptimal = triangle(s, ...soilSets[1]);
+    soilWet = triangle(s, ...soilSets[2]);
 
-      let tempCold = triangle(t, 0, 0, 20);
-      let tempOptimal = triangle(t, 15, 25, 35);
-      let tempHot = triangle(t, 30, 40, 50);
+    tempCold = triangle(t, ...tempSets[0]);
+    tempOptimal = triangle(t, ...tempSets[1]);
+    tempHot = triangle(t, ...tempSets[2]);
 
-      let lightDark = triangle(l, 0, 0, 50);
-      let lightOptimal = triangle(l, 40, 70, 100);
-      let lightBright = triangle(l, 80, 90, 100);
-    } else if (plant == "paprotka") {
-      let soilDry = triangle(s, 0, 0, 60);
-      let soilOptimal = triangle(s, 50, 70, 90);
-      let soilWet = triangle(s, 80, 90, 100);
-
-      let tempCold = triangle(t, 0, 0, 18);
-      let tempOptimal = triangle(t, 15, 25, 35);
-      let tempHot = triangle(t, 30, 40, 50);
-
-      let lightDark = triangle(l, 0, 0, 20);
-      let lightOptimal = triangle(l, 10, 40, 70);
-      let lightBright = triangle(l, 60, 80, 100);
-    } */
-
-    let soilDry = triangle(s, 0, 0, 20);
-    let soilOptimal = triangle(s, 10, 30, 50);
-    let soilWet = triangle(s, 40, 60, 100);
-
-    let tempCold = triangle(t, 0, 0, 20);
-    let tempOptimal = triangle(t, 15, 25, 35);
-    let tempHot = triangle(t, 30, 40, 50);
-
-    let lightDark = triangle(l, 0, 0, 50);
-    let lightOptimal = triangle(l, 40, 70, 100);
-    let lightBright = triangle(l, 80, 90, 100);
+    lightDark = triangle(l, ...lightSets[0]);
+    lightOptimal = triangle(l, ...lightSets[1]);
+    lightBright = triangle(l, ...lightSets[2]);
 
     let day = triangle(time, 6, 12, 18);
     let night = 1 - day;
@@ -118,7 +199,7 @@ export function step(timeStep) {
     health += change;
     health = Math.max(0, Math.min(100, health));
 
-    // ===== KOMUNIKAT =====
+    // KOMUNIKAT 
     if (bad > 0.6) {
       msg.innerText = "Warunki złe!";
     } else if (bad > 0.3) {
@@ -127,8 +208,9 @@ export function step(timeStep) {
       msg.innerText = "Warunki dobre";
     }
 
-    // ===== CZAS =====
-    time = (time + timeStep) % 24;
+    // CZAS 
+    time = (time + 1) % 24;
+    updateHistory();
   }
 
   updateUI();
@@ -142,23 +224,24 @@ export function step(timeStep) {
   }
 }
 
-// ===== AKCJE GRY =====
+// AKCJE GRY
 
-export function changePlant(newPlant) {
+function changePlant(newPlant) {
   plant = newPlant;
-  let time = 8; // czas
-  let health = 20; // zdrowie rośliny
+  time = 8; // czas
+  health = 20; // zdrowie rośliny
   msg.innerText = "Zmieniłeś roślinę na " + plant;
 
+  resetHistory();
   updateUI();
 }
 
-// ===== INIT =====
-updateUI();
+// INIT
+window.addEventListener("load", () => {
+  resetHistory();
+  updateUI();
+});
 
-// ===== PODPIĘCIE DO OKNA =====
+// PODPIĘCIE DO OKNA
 window.step = step;
-window.nextDay = nextDay;
-
-// window.water = water;
-// window.lamp = lamp;
+window.changePlant = changePlant;

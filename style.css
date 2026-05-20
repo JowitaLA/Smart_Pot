@@ -8,6 +8,125 @@ body {
   background: rgba(255, 255, 255, 0.4) !important;
   padding: 20px;
   margin: 20px auto;
-  width: 300px;
+  width: 340px;
   border-radius: 15px;
 }
+
+#fuzzyChart {
+  margin-top: 5px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+}
+
+#historyChart {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  width: 300px !important;
+  height: 150px !important;
+}
+
+#fuzzySoil,
+#fuzzyLight,
+#fuzzyTemp,
+#historyChart {
+  display: block;
+  margin-top: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  background: #fff;
+}
+
+#histTooltip {
+  transform: translate(-50%, -100%);
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.history-legend {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 14px;
+  color: #222;
+}
+
+.legend-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 20%;
+  margin-right: 4px;
+}
+
+.legend-dot.health { background: #28a745; }
+.legend-dot.soil { background: #007bff; }
+.legend-dot.light { background: #fd7e14; }
+.legend-dot.temp { background: #dc3545; }
+
+.content-background {
+  background-color: rgb(143, 175, 182);
+}
+
+.header-background {
+  background-color: rgba(162, 175, 68, 0.75);
+  padding-top: 20px;
+  padding-bottom: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  transition: 0.3s;
+}
+
+.header-background:hover {
+  background-color: rgba(162, 175, 68, 0.8);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+.footer-background {
+  background-color: rgba(162, 175, 68, 0.75);
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  transition: 0.3s;
+}
+
+.footer-background:hover {
+  background-color: rgba(162, 175, 68, 0.8);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+.row > .col.text-center .section-top {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+}
+
+.row > .col.text-center .section-top h3,
+.row > .col.text-center .section-top p,
+.row > .col.text-center .section-top .btn {
+  margin-bottom: 0.75rem;
+}
+
+.season-buttons {
+  gap: 0.4rem;
+}
+
+.season-buttons .season-btn {
+  margin: 0.35rem 0;
+  min-width: 130px;
+}
+
+.bg-card {
+  background: rgba(180, 207, 208, 0.3) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(116, 106, 106, 0.15);
+  padding: 20px;
+  transition: 0.3s;
+}
+
+.bg-card:hover {
+  background: rgba(180, 207, 208, 0.5) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(116, 106, 106, 0.15);
+}
+
