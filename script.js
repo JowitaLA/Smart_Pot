@@ -9,7 +9,7 @@ function triangle(x, a, b, c) {
 // ZMIENNE GRY
 let time = 8; // czas
 let health = 20; // zdrowie rośliny
-let plant = "storczyk"; // podstawowa roślina
+let plant = "storczyk"; // podstawowa roślinatzzt
 
 // POBIERANIE ELEMENTÓW
 const soil = document.getElementById("soil");
@@ -225,7 +225,6 @@ function step(timeStep) {
 }
 
 // AKCJE GRY
-
 function changePlant(newPlant) {
   plant = newPlant;
   time = 8; // czas

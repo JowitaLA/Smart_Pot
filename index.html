@@ -15,13 +15,9 @@
   </header>
   <div class="rounded shadow p-4">
     <div class="row">
-      <div class="col-md-9 d-flex flex-column align-items-center mb-4 mb-md-0">
-        <p>Godzina: <span id="time">8</span>:00</p>
+      <div class="col d-flex flex-column align-items-center mb-4 mb-md-0 position-relative bg-card mr-2">
+        
 
-        <div class="mt-3 d-flex justify-content-center">
-          <button class="btn btn-primary mr-2" onclick="step(24)">Następny dzień</button>
-          <button class="btn btn-primary" onclick="step(1)">Następna godzina</button>
-        </div>
       </div>
 
       <div class="col-md-3 d-flex flex-column bg-card align-items-center">
@@ -33,6 +29,11 @@
           <canvas id="historyChart" width="300" height="150"></canvas>
         </div>
       </div>
+    </div>
+    <p class="text-center">Godzina: <span id="time">8</span>:00</p>
+    <div class="mt-3 d-flex justify-content-center">
+      <button class="btn btn-primary mr-2" onclick="step(24)">Następny dzień</button>
+      <button class="btn btn-primary" onclick="step(1)">Następna godzina</button>
     </div>
     <p id="msg"></p>
   </div>

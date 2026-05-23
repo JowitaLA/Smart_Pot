@@ -117,7 +117,7 @@ function drawFuzzyTemp() {
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle = "#333";
-  ctx.fillText(`${currentValue}°C`, markerX - 15, 28);
+  ctx.fillText(`${currentValue}°C`, markerX - 30, 28);
 }
 
 function drawFuzzySoil() {
@@ -282,7 +282,7 @@ function initHistoryChart() {
           borderWidth: 3,
         },
         {
-          label: "Gleba",
+          label: "Nawodnienie",
           data: history.soil,
           borderColor: "#007bff",
           backgroundColor: "rgba(0,123,255,0.12)",
@@ -325,14 +325,14 @@ function initHistoryChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: true,
+          display: false,
           position: "top",
           align: "end",
           labels: {
             usePointStyle: true,
             pointStyle: "circle",
-            boxWidth: 10,
-            boxHeight: 10,
+            boxWidth: 3,
+            boxHeight: 3,
           },
         },
         tooltip: {
@@ -342,7 +342,15 @@ function initHistoryChart() {
         },
         title: {
           display: true,
+          position: "top",
+          align: "start",
+          padding: { top: 10, bottom: 10 },
           text: "Historia",
+        },
+      },
+      layout: {
+        padding: {
+          left: 30,
         },
       },
       scales: {
