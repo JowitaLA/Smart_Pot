@@ -94,6 +94,14 @@ body {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
+.main-background {
+  /* tło 3/4 okno 1/4 parapet na którym będzie stać roślina */
+  background: rgba(180, 207, 208, 0.3) !important;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 .row > .col.text-center .section-top {
   display: flex;
   flex-direction: column;
@@ -129,4 +137,5 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(116, 106, 106, 0.15);
 }
+
 
