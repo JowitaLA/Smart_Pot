@@ -12,6 +12,14 @@ body {
   border-radius: 15px;
 }
 
+#mainButton img:nth-child(2) {
+  transition: transform 0.5s ease;
+}
+
+#mainButton:hover img:nth-child(2) {
+  transform: scale(1.1);
+}
+
 #fuzzyChart {
   margin-top: 5px;
   border-radius: 8px;
@@ -60,10 +68,18 @@ body {
   margin-right: 4px;
 }
 
-.legend-dot.health { background: #28a745; }
-.legend-dot.soil { background: #007bff; }
-.legend-dot.light { background: #fd7e14; }
-.legend-dot.temp { background: #dc3545; }
+.legend-dot.health {
+  background: #28a745;
+}
+.legend-dot.soil {
+  background: #007bff;
+}
+.legend-dot.light {
+  background: #fd7e14;
+}
+.legend-dot.temp {
+  background: #dc3545;
+}
 
 .content-background {
   background-color: rgb(143, 175, 182);
@@ -137,5 +153,3 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(116, 106, 106, 0.15);
 }
-
-
