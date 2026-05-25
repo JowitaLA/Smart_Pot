@@ -1,7 +1,45 @@
+:root {
+  --primary-color: #2f6b73;
+  --custom: 125, 196, 210;
+  --content: 233, 244, 238;
+  --card: 248, 237, 219;
+}
+
+.podgląd{
+  background: rgb(131, 210, 125) !important;
+  background: rgb(233, 244, 238) !important;
+  background: rgb(248, 237, 219) !important;
+
+}
+
+.text-custom {
+  color: var(--primary-color) !important;
+}
+
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:not(:disabled):not(.disabled):active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  filter: brightness(0.95);
+  box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
+}
+
 body {
   font-family: Arial;
   text-align: center;
   transition: background 1s;
+}
+
+input[type="range"] {
+  accent-color: var(--primary-color);
+  cursor: pointer;
 }
 
 .card {
@@ -9,7 +47,18 @@ body {
   padding: 20px;
   margin: 20px auto;
   width: 340px;
-  border-radius: 15px;
+  border-radius: 5px !important;
+}
+
+#sky {
+  position: absolute;
+  border: 10px solid rgb(90, 48, 2);
+  top: 0;
+  border-radius: 5px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 #mainButton img:nth-child(2) {
@@ -71,22 +120,25 @@ body {
 .legend-dot.health {
   background: #28a745;
 }
+
 .legend-dot.soil {
   background: #007bff;
 }
+
 .legend-dot.light {
   background: #fd7e14;
 }
+
 .legend-dot.temp {
   background: #dc3545;
 }
 
 .content-background {
-  background-color: rgb(143, 175, 182);
+  background-color: rgb(var(--content));
 }
 
 .header-background {
-  background-color: rgba(162, 175, 68, 0.75);
+  background-color: rgba(var(--custom), 0.75);
   padding-top: 20px;
   padding-bottom: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
@@ -94,62 +146,570 @@ body {
 }
 
 .header-background:hover {
-  background-color: rgba(162, 175, 68, 0.8);
+  background-color: rgba(var(--custom), 0.85);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
 .footer-background {
-  background-color: rgba(162, 175, 68, 0.75);
+  background-color: rgba(var(--custom), 0.65);
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
   transition: 0.3s;
 }
 
 .footer-background:hover {
-  background-color: rgba(162, 175, 68, 0.8);
+  background-color: rgba(var(--custom), 0.8);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
-.main-background {
-  /* tło 3/4 okno 1/4 parapet na którym będzie stać roślina */
-  background: rgba(180, 207, 208, 0.3) !important;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.row > .col.text-center .section-top {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 220px;
-}
-
-.row > .col.text-center .section-top h3,
-.row > .col.text-center .section-top p,
-.row > .col.text-center .section-top .btn {
-  margin-bottom: 0.75rem;
-}
-
-.season-buttons {
-  gap: 0.4rem;
-}
-
-.season-buttons .season-btn {
-  margin: 0.35rem 0;
-  min-width: 130px;
-}
-
 .bg-card {
-  background: rgba(180, 207, 208, 0.3) !important;
+  background: rgba(var(--card), 0.5) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(116, 106, 106, 0.15);
   padding: 20px;
+  border-radius: 15px;
   transition: 0.3s;
 }
 
 .bg-card:hover {
-  background: rgba(180, 207, 208, 0.5) !important;
+  background: rgba(var(--card), 0.6) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(116, 106, 106, 0.15);
+}
+
+/* KOMUNIKATY */
+#msg {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  color: #e8e8e8;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: italic;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+  opacity: 1;
+  pointer-events: auto;
+  transition: 0.3s ease;
+  z-index: 10;
+}
+
+/* ŻALUZJA */
+/* Żaluzja */
+.shutter {
+  position: absolute;
+  background: rgba(111, 95, 75, 0.313);
+  width: 100%;
+  height: 90%;
+  right: 0;
+  top: 0;
+  display: none;
+  z-index: 0;
+}
+
+/* Przycisk żaluzji */
+#shutterButton {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(21, 21, 21, 0.938) 0%, rgba(50, 50, 50, 0.8) 100%) !important;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  top: 1%;
+  right: 1%;
+}
+
+/* ZEGAR */
+/* Zegar */
+.clock {
+  /* background: linear-gradient(to top, #654321, transparent); */
+  position: absolute;
+  bottom: 10%;
+  left: 0%;
+  max-width: 13%;
+  height: auto;
+  z-index: 3;
+  margin-left: 10px;
+}
+
+#clock {
+  max-width: 100%;
+  z-index: 4;
+}
+
+/* Czas */
+#clockTime {
+  position: absolute;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+  /* daje efekt zegarka */
+  top: 22%;
+  right: 24px;
+  z-index: 5;
+}
+
+/* Pora roku */
+#clockSession {
+  position: absolute;
+  max-width: 20%;
+  left: 24px;
+  bottom: 26%;
+  z-index: 5;
+}
+
+/* Dzień */
+#clockDay {
+  position: absolute;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+  /* daje efekt zegarka */
+  text-align: right;
+  bottom: 14%;
+  right: 24px;
+  font-size: 11px;
+  z-index: 5;
+}
+
+/* Temperatura */
+#clockTemperature {
+  position: absolute;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+  font-size: 80%;
+  top: 24%;
+  left: 24px;
+  z-index: 5;
+}
+
+/* Przyciski nawigacyjne */
+#buttonNextHour {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(130, 155, 1, 0.938) 0%, rgba(113, 130, 116, 0.8) 100%) !important;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  width: 10%;
+  height: 10%;
+  border-radius: 50%;
+  transition: background 0.3s, transform 0.2s;
+  bottom: 2%;
+  left: 25%;
+  z-index: 5;
+}
+
+#buttonNextHour:hover {
+  background: linear-gradient(135deg, rgba(130, 155, 1, 1) 0%, rgba(113, 130, 116, 1) 100%) !important;
+  transform: scale(1.1);
+  z-index: 6;
+}
+
+#buttonNextDay {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(179, 154, 30, 0.938) 0%, rgba(172, 158, 143, 0.8) 100%) !important;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  width: 10%;
+  height: 10%;
+  border-radius: 50%;
+  transition: background 0.3s, transform 0.2s;
+  bottom: 2%;
+  right: 25%;
+  z-index: 5;
+}
+
+#buttonNextDay:hover {
+  background: linear-gradient(135deg, rgba(179, 154, 30, 1) 0%, rgba(172, 158, 143, 1) 100%) !important;
+  transform: scale(1.1);
+  z-index: 6;
+}
+
+/* LAMPA */
+/* Lampa */
+.lamp {
+  /* background: linear-gradient(to top, #654321, transparent); */
+  position: absolute;
+  bottom: 0.9%;
+  left: 20%;
+  max-width: 25%;
+  height: 90%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  z-index: 2;
+}
+
+#lamp {
+  height: 100%;
+  width: auto;
+  z-index: 1;
+}
+
+/* Oświetlanie */
+#lampLight,
+#lampHeater,
+#lampLightOn,
+#lampHeaterOn {
+  position: absolute;
+  height: 100%;
+  width: auto;
+  z-index: 1;
+}
+
+#lampLight,
+#lampHeater {
+  opacity: 0.75;
+}
+
+/* Przycisk lampy */
+#buttonLight{
+  position: absolute;
+  background: rgba(255, 200, 1, 0.93) !important;
+  border: 3px solid rgba(192, 133, 45, 0.5);
+  width: 20px;
+  height: 20px;
+  left: 20%;
+  border-radius: 50%;
+  bottom: 11%;
+  z-index: 5;
+  transition: background 0.3s, transform 0.2s;
+}
+#buttonLight:hover {
+  background: rgba(255, 200, 1, 1) !important;
+  border: 3px solid rgba(192, 133, 45, 0.6);
+  transform: scale(1.2);
+  z-index: 6;
+}
+
+/* Przycisk lampy */
+#buttonHeater{
+  position: absolute;
+  background: rgba(195, 24, 12, 0.93) !important;
+  border: 3px solid rgba(107, 57, 17, 0.5);
+  width: 20px;
+  height: 20px;
+  left: 30%;
+  border-radius: 50%;
+  bottom: 11%;
+  z-index: 5;
+  transition: background 0.3s, transform 0.2s;
+}
+#buttonHeater:hover {
+  background: rgba(195, 24, 12, 1) !important;
+  border: 3px solid rgba(107, 57, 17, 0.6);
+  transform: scale(1.2);
+  z-index: 6;
+}
+
+/* WENTYLATOR */
+/* Wentylator */
+.fan {
+  /* background: linear-gradient(to top, #654321, transparent); */
+  position: absolute;
+  bottom: 4%;
+  right: 0%;
+  max-width: 25%;
+  height: 90%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  z-index: 2;
+}
+
+#fan {
+  height: 100%;
+  width: auto;
+  z-index: 3;
+}
+
+#fanWater,
+#fanWaterOn,
+#fanWind,
+#fanWindOn,
+#fanSplatter,
+#fanSplatterOn,
+#fanWateringOn,
+#fanPumpingOn {
+  position: absolute;
+  height: 100%;
+  width: auto;
+  z-index: 3;
+}
+
+#fanWater {
+  z-index: 1 !important;
+}
+
+#fanWind,
+#fanSplatter {
+  opacity: 0.75;
+}
+
+/* Przycisk lampy */
+#buttonWind{
+  position: absolute;
+  background: rgba(185, 186, 187, 0.93) !important;
+  border: 3px solid rgba(186, 211, 220, 0.5);
+  width: 20px;
+  height: 20px;
+  left: 35%;
+  border-radius: 50%;
+  bottom: 11%;
+  z-index: 5;
+  transition: background 0.3s, transform 0.2s;
+}
+#buttonWind:hover {
+  background: rgba(187, 187, 185, 1) !important;
+  border: 3px solid rgba(206, 205, 203, 0.6);
+  transform: scale(1.2);
+  z-index: 6;
+}
+
+#buttonSplatter {
+  position: absolute;
+  background: rgba(136, 210, 234, 0.93) !important;
+  border: 3px solid rgba(110, 175, 197, 0.5);
+  width: 20px;
+  height: 20px;
+  left: 45%;
+  border-radius: 50%;
+  bottom: 11%;
+  z-index: 5;
+  transition: background 0.3s, transform 0.2s;
+}
+#buttonSplatter:hover {
+  background: rgba(136, 210, 234, 1) !important;
+  border: 3px solid rgba(110, 175, 197, 0.6);
+  transform: scale(1.2);
+  z-index: 6;
+}
+
+#buttonPumping {
+  position: absolute;
+  background: rgba(210, 129, 16, 0.93) !important;
+  border: 3px solid rgba(169, 80, 7, 0.5);
+  width: 20px;
+  height: 20px;
+  right: 25%;
+  border-radius: 50%;
+  bottom: 11%;
+  z-index: 5;
+  transition: background 0.3s, transform 0.2s;
+}
+#buttonPumping:hover {
+  background: rgba(210, 129, 16, 1) !important;
+  border: 3px solid rgba(169, 80, 7, 0.6);
+  transform: scale(1.2);
+  z-index: 6;
+}
+
+#buttonWatering {
+  position: absolute;
+  background: rgba(25, 192, 175, 0.93) !important;
+  border: 3px solid rgba(50, 159, 147, 0.5);
+  width: 20px;
+  height: 20px;
+  right: 35%;
+  border-radius: 50%;
+  bottom: 11%;
+  z-index: 5;
+  transition: background 0.3s, transform 0.2s;
+}
+#buttonWatering:hover {
+  background: rgba(25, 192, 175, 1) !important;
+  border: 3px solid rgba(50, 159, 147, 0.6);
+  transform: scale(1.2);
+  z-index: 6;
+}
+
+/* DONICZKA */
+.pot {
+  position: absolute;
+  bottom: 1%;
+  left: 60%;
+  max-width: 25%;
+  height: 50%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  z-index: 2;
+}
+
+#pot {
+  position: absolute;
+  height: 100%;
+  z-index: 2;
+}
+
+/* ROŚLINA */
+#plant {
+  position: absolute;
+  bottom: 70%;
+  height: 100%;
+  z-index: 1;
+}
+
+#potSmartOn, #potCold, #potHot, #potMist, #potShade, #potSun, #potWater, #potStatus {
+  position: absolute;
+  height: 100%;
+  width: auto;
+  z-index: 3;
+}
+
+#buttonSMART {
+  position: absolute;
+  background: rgba(172, 158, 143, 0.0) !important;
+  border: 3px solid rgba(0, 0, 0, 0.0);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  bottom: 19%;
+  z-index: 5;
+}
+
+/* PARAPET */
+.windowsill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 10%;
+  left: 0;
+  background: linear-gradient(to bottom, #8b7355, #654321);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+
+
+/* Media Queries */
+@media screen and (min-width: 1920px) {
+  .clock {
+    left: 12px;
+    bottom: 10%;
+    max-width: 11%;
+  }
+
+  #clockTime {
+    right: 18px;
+  }
+
+  #clockDay {
+    right: 18px;
+  }
+
+  #clockSession {
+    left: 18px;
+  }
+
+  #clockTemperature {
+    left: 18px;
+  }
+}
+
+@media screen and (min-width: 1600px) and (max-width: 1919px) {
+  .clock {
+    left: 10px;
+    bottom: 10%;
+    max-width: 12%;
+  }
+
+  #clockTime {
+    right: 20px;
+  }
+
+  #clockDay {
+    right: 20px;
+  }
+
+  #clockSession {
+    left: 16px;
+  }
+
+  #clockTemperature {
+    left: 20px;
+  }
+}
+
+@media screen and (min-width: 1366px) and (max-width: 1599px) {
+  .clock {
+    left: 10px;
+    bottom: 10%;
+    max-width: 13%;
+  }
+
+  #clockTime {
+    font-size: 14px;
+    right: 11px;
+  }
+
+  #clockDay {
+    right: 11px;
+  }
+
+  #clockSession {
+    left: 11px;
+  }
+
+  #clockTemperature {
+    font-size: 14px;
+    left: 11px;
+  }
+}
+
+@media screen and (min-width: 1200px) and (max-width: 1365px) {
+  .clock {
+    left: 8px;
+    bottom: 9%;
+    max-width: 15%;
+  }
+
+  #clockTime {
+    font-size: 14px;
+    right: 15px;
+  }
+
+  #clockDay {
+    font-size: 9px;
+    right: 15px;
+  }
+
+  #clockSession {
+    left: 15px;
+  }
+
+  #clockTemperature {
+    font-size: 14px;
+    left: 15px;
+  }
+}
+
+@media screen and (max-width: 1199px) {
+  .clock {
+    left: 5px;
+    bottom: 8%;
+    max-width: 17%;
+  }
+
+  #clockTime,
+  #clockDay,
+  #clockSession,
+  #clockTemperature {
+    font-size: 0.9rem;
+  }
+
+  #clockTime {
+    right: 18px;
+    top: 20%;
+  }
+
+  #clockDay {
+    right: 18px;
+    bottom: 20%;
+  }
+
+  #clockSession {
+    left: 12px;
+  }
+
+  #clockTemperature {
+    left: 18px;
+  }
 }

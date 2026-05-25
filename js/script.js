@@ -16,6 +16,7 @@ const soil = document.getElementById("soil");
 const light = document.getElementById("light");
 const temp = document.getElementById("temp");
 const msg = document.getElementById("msg");
+const sky = document.getElementById("sky");
 const chartVarSelect = document.getElementById("chartVar");
 const fuzzySoilChart = document.getElementById("fuzzySoil");
 const fuzzyLightChart = document.getElementById("fuzzyLight");
@@ -137,7 +138,7 @@ function updateUI() {
 
   // Dzień / noc
   let day = triangle(time, 6, 12, 18);
-  //document.body.style.background = day > 0.3 ? "#73abc1" : "#57657b";
+  sky.style.background = day > 0.3 ? "#74bcd4" : "#828282";
 
   drawFuzzyChart();
 }
@@ -202,11 +203,25 @@ function step(timeStep) {
     // KOMUNIKAT 
     if (bad > 0.6) {
       msg.innerText = "Warunki złe!";
+      msg.style.background = "#d9534f";
+      msg.style.padding = "5px";
     } else if (bad > 0.3) {
       msg.innerText = "Roślina w stresie";
+      msg.style.background = "#f0ad4e";
+      msg.style.padding = "5px";
     } else {
       msg.innerText = "Warunki dobre";
+      msg.style.background = "#9fc66b";
+      msg.style.padding = "5px";
     }
+
+    const currentMsg = msg.innerText;
+    setTimeout(() => {
+      if (msg.innerText === currentMsg) {
+        msg.innerText = "";
+        msg.style.padding = "0px";
+      }
+    }, 5000);
 
     // CZAS 
     time = (time + 1) % 24;
@@ -232,6 +247,12 @@ function changePlant(newPlant) {
   msg.innerText = "Zmieniłeś roślinę na " + plant;
 
   resetHistory();
+  updateUI();
+}
+
+function toggleShutter() {
+  const shutter = document.querySelector(".shutter");
+  shutter.style.display = shutter.style.display === "none" ? "block" : "none";
   updateUI();
 }
 
