@@ -243,14 +243,14 @@ function drawFuzzyLight() {
   const markerX =
     padding + ((width - padding - 15) * currentValue) / params.xMax;
   ctx.setLineDash([4, 3]);
-  ctx.strokeStyle = "#333 !important";
+  ctx.strokeStyle = "#333";
   ctx.beginPath();
   ctx.moveTo(markerX, height - padding);
   ctx.lineTo(markerX, 10);
   ctx.stroke();
   ctx.setLineDash([]);
 
-  ctx.fillStyle = "#333 !important";
+  ctx.fillStyle = "#333";
   ctx.fillText(`${currentValue}`, markerX - 15, 28);
 }
 

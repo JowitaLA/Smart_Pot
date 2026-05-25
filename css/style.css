@@ -177,6 +177,14 @@ input[type="range"] {
   border: 1px solid rgba(116, 106, 106, 0.15);
 }
 
+#logo {
+  position: fixed;
+  width: 5%;
+  height: auto;
+  bottom: 0%;
+  left: 5%;
+}
+
 /* KOMUNIKATY */
 #msg {
   position: absolute;
@@ -188,6 +196,7 @@ input[type="range"] {
   border-radius: 12px;
   font-size: 18px;
   font-weight: italic;
+  padding: 10px;
 
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 

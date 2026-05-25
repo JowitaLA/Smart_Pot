@@ -10,6 +10,12 @@ function triangle(x, a, b, c) {
 let time = 8; // czas
 let health = 20; // zdrowie rośliny
 let plant = "storczyk"; // podstawowa roślinatzzt
+let smartEnabled = false;
+let moistureControlState = {
+  watering: false,
+  pumping: false,
+};
+let moistureControlMode = "static"; // static | watering | pumping
 
 // POBIERANIE ELEMENTÓW
 const soil = document.getElementById("soil");
@@ -131,10 +137,16 @@ chartVarSelect?.addEventListener("change", updateUI);
 function updateUI() {
   document.getElementById("time").innerText = time;
   document.getElementById("health").innerText = Math.round(health);
-
   document.getElementById("soilVal").innerText = soil.value;
   document.getElementById("lightVal").innerText = light.value;
   document.getElementById("tempVal").innerText = temp.value;
+
+  const smartIcon = document.getElementById("potSmartOn");
+  if (smartIcon) {
+    smartIcon.style.display = smartEnabled ? "block" : "none";
+  }
+
+  syncMoistureControl();
 
   // Dzień / noc
   let day = triangle(time, 6, 12, 18);
@@ -143,12 +155,124 @@ function updateUI() {
   drawFuzzyChart();
 }
 
+function getSoilFuzzyState(value) {
+  const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
+  const soilSets = plantConfig.soil.sets;
+
+  return {
+    dry: triangle(value, ...soilSets[0]),
+    optimal: triangle(value, ...soilSets[1]),
+    wet: triangle(value, ...soilSets[2]),
+  };
+}
+
+// Wilgotność gleby: wyświetlanie powiadomień
+function updateMoistureVisuals() {
+  const wateringIcon = document.getElementById("fanWateringOn");
+  const pumpingIcon = document.getElementById("fanPumpingOn");
+
+  if (wateringIcon) {
+    wateringIcon.style.display = moistureControlState.watering ? "block" : "none";
+  }
+
+  if (pumpingIcon) {
+    pumpingIcon.style.display = moistureControlState.pumping ? "block" : "none";
+  }
+}
+
+// Sterowanie wilgotnością gleby
+function syncMoistureControl() {
+  const currentSoil = parseInt(soil.value, 10);
+  const { dry, optimal, wet } = getSoilFuzzyState(currentSoil);
+
+  if (moistureControlMode === "watering") {
+    moistureControlState.watering = true;
+    moistureControlState.pumping = false;
+  } else if (moistureControlMode === "pumping") {
+    moistureControlState.watering = false;
+    moistureControlState.pumping = true;
+  } else if (
+    smartEnabled &&
+    dry > wet &&
+    dry >= optimal &&
+    dry > 0.2
+  ) {
+    moistureControlState.watering = true;
+    moistureControlState.pumping = false;
+  } else if (
+    smartEnabled &&
+    wet > dry &&
+    wet >= optimal &&
+    wet > 0.2
+  ) {
+    moistureControlState.watering = false;
+    moistureControlState.pumping = true;
+  } else {
+    moistureControlState.watering = false;
+    moistureControlState.pumping = false;
+  }
+
+  updateMoistureVisuals();
+}
+
+// Zastosowanie efektów sterowania wilgotnością gleby
+function applyMoistureControl() {
+  let currentSoil = parseInt(soil.value, 10);
+
+  if (moistureControlMode === "watering") {
+    currentSoil = Math.min(100, currentSoil + 4);
+    soil.value = String(currentSoil);
+    msg.innerText = "Podlewanie aktywne: gleba jest nawadniana";
+    msg.style.background = "#5bc0de";
+  } else if (moistureControlMode === "pumping") {
+    currentSoil = Math.max(0, currentSoil - 4);
+    soil.value = String(currentSoil);
+    msg.innerText = "Odpompowywanie aktywne: nadmiar wody jest usuwany";
+    msg.style.background = "#f0ad4e";
+  } else if (smartEnabled) {
+    const { dry, wet } = getSoilFuzzyState(currentSoil);
+
+    if (wet > dry && wet > 0.2) {
+      currentSoil = Math.max(0, currentSoil - 1);
+    } else if (dry > wet && dry > 0.2) {
+      currentSoil = Math.min(100, currentSoil + 1);
+    }
+
+    soil.value = String(currentSoil);
+  }
+
+  soil.dispatchEvent(new Event("input", { bubbles: true }));
+  syncMoistureControl();
+  updateUI();
+}
+
+function waterFan() {
+  moistureControlMode = moistureControlMode === "watering" ? "static" : "watering";
+  applyMoistureControl();
+}
+
+function pumpingFan() {
+  moistureControlMode = moistureControlMode === "pumping" ? "static" : "pumping";
+  applyMoistureControl();
+}
+
+function toggleSmartMode() {
+  smartEnabled = !smartEnabled;
+  if (!smartEnabled) {
+    moistureControlMode = "static";
+  }
+  syncMoistureControl();
+  updateUI();
+}
+
 // Parametry w doniczce
 function step(timeStep) {
   for (let i = 0; i < timeStep; i++) {
-    let s = parseInt(soil.value); // wilgotność gleby
-    let l = parseInt(light.value); // światło
-    let t = parseInt(temp.value); // temperatura
+    applyMoistureControl();
+
+    let s = parseInt(soil.value, 10); // wilgotność gleby
+    let l = parseInt(light.value, 10); // światło
+    let t = parseInt(temp.value, 10); // temperatura
 
     // FUZZIFICATION
     let soilDry, soilOptimal, soilWet;
@@ -204,15 +328,12 @@ function step(timeStep) {
     if (bad > 0.6) {
       msg.innerText = "Warunki złe!";
       msg.style.background = "#d9534f";
-      msg.style.padding = "5px";
     } else if (bad > 0.3) {
       msg.innerText = "Roślina w stresie";
       msg.style.background = "#f0ad4e";
-      msg.style.padding = "5px";
     } else {
       msg.innerText = "Warunki dobre";
       msg.style.background = "#9fc66b";
-      msg.style.padding = "5px";
     }
 
     const currentMsg = msg.innerText;
@@ -265,3 +386,5 @@ window.addEventListener("load", () => {
 // PODPIĘCIE DO OKNA
 window.step = step;
 window.changePlant = changePlant;
+window.waterFan = waterFan;
+window.pumpingFan = pumpingFan;
