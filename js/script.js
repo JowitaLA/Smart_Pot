@@ -7,12 +7,21 @@ function triangle(x, a, b, c) {
 }
 
 // ZMIENNE GRY
+const seasons = ["winter", "spring", "summer", "autumn"]; // pory roku
+
 let time = 8; // czas
-let howDay = 0; // dzień
-let health = 20; // zdrowie rośliny
-let season = "winter"; // pora roku: summer | autumn | winter | spring
-let plant = "storczyk"; // podstawowa roślina
+let totalDay = 0; // dzień
+let seasonDay = 0;
+
+let season = "spring"; // aktualna pora roku: summer | autumn | winter | spring
+let plant = "storczyk"; // podstawowa roślina: storczyk | kaktus | paprotka
 let smartEnabled = false;
+
+let soil = 50; // wilgotność gleby
+let light = 50; // światło
+let temp = 20; // temperatura
+let health = 80; // zdrowie rośliny
+
 let moistureControlState = {
   watering: false,
   pumping: false,
@@ -20,17 +29,23 @@ let moistureControlState = {
 let moistureControlMode = "static"; // static | watering | pumping
 
 // POBIERANIE ELEMENTÓW
-const soil = document.getElementById("soil");
-const light = document.getElementById("light");
-const temp = document.getElementById("temp");
-const msg = document.getElementById("msg");
+const msgState = document.getElementById("msgState");
+const msgInfo = document.getElementById("msgInfo");
+const msgSeason = document.getElementById("msgSeason");
+
 const sky = document.getElementById("sky");
 const chartVarSelect = document.getElementById("chartVar");
+
 const fuzzySoilChart = document.getElementById("fuzzySoil");
 const fuzzyLightChart = document.getElementById("fuzzyLight");
 const fuzzyTempChart = document.getElementById("fuzzyTemp");
-const days = document.getElementById("dayVal");
+
+const soilNewPlant = document.getElementById("soilNewPlant");
+const lightNewPlant = document.getElementById("lightNewPlant");
+const tempNewPlant = document.getElementById("tempNewPlant");
 const healthNewPlant = document.getElementById("healthNewPlant");
+
+const days = document.getElementById("days");
 
 // PARAMETRY ROŚLIN
 const plantFuzzyConfig = {
@@ -132,22 +147,40 @@ const plantFuzzyConfig = {
   },
 };
 
-soil.addEventListener("input", updateUI);
-light.addEventListener("input", updateUI);
-temp.addEventListener("input", updateUI);
-chartVarSelect?.addEventListener("change", updateUI);
+soilNewPlant.addEventListener("input", updateUI);
+lightNewPlant.addEventListener("input", updateUI);
+tempNewPlant.addEventListener("input", updateUI);
+healthNewPlant.addEventListener("input", updateUI);
 
+days.addEventListener("input", updateUI);
+
+chartVarSelect?.addEventListener("change", updateUI);
 
 // UI
 function updateUI() {
   document.getElementById("time").innerText = time;
-  document.getElementById("day").innerText = howDay;
+  document.getElementById("day").innerText = totalDay;
+  document.getElementById("dayVal").innerText = days.value;
+
+  document.getElementById("soilVal").innerText = soil;
+  document.getElementById("lightVal").innerText = light;
+  document.getElementById("tempVal").innerText = temp;
+  document.getElementById("healthVal").innerText = health;
+
   document.getElementById("clockSeason").src = "img/clock/" + season + ".png";
-  document.getElementById("health").innerText = Math.round(health);
-  document.getElementById("soilVal").innerText = soil.value;
-  document.getElementById("lightVal").innerText = light.value;
-  document.getElementById("tempVal").innerText = temp.value;
-  document.getElementById("plant").src = "img/pot/flowers/" + (plant == "storczyk" ? "orchid" : plant == "kaktus" ? "cactus" : "fern") + "_" + (health > 50 ? "good" : health > 30 ? "ok" : "bad") + ".png";
+
+  document.getElementById("soilNewPlantVal").innerText = soilNewPlant.value;
+  document.getElementById("lightNewPlantVal").innerText = lightNewPlant.value;
+  document.getElementById("tempNewPlantVal").innerText = tempNewPlant.value;
+  document.getElementById("healthNewPlantVal").innerText = healthNewPlant.value;
+
+  document.getElementById("plant").src =
+    "img/pot/flowers/" +
+    (plant == "storczyk" ? "orchid" : plant == "kaktus" ? "cactus" : "fern") +
+    "_" +
+    (health > 50 ? "good" : health > 30 ? "ok" : "bad") +
+    ".png";
+
   const smartIcon = document.getElementById("potSmartOn");
   if (smartIcon) {
     smartIcon.style.display = smartEnabled ? "block" : "none";
@@ -157,9 +190,37 @@ function updateUI() {
 
   // Dzień / noc
   let day = triangle(time, 6, 12, 18);
-  sky.style.background = day > 0.3 ? "#74bcd4" : "#828282";
+  sky.style.background = day > 0.6 ? "#74bcd4" : day > 0.2 ? "#a46d08" : "#333";
 
   drawFuzzyChart();
+
+  msgState.style.padding = "10px";
+  msgInfo.style.padding = "10px";
+  msgSeason.style.padding = "10px";
+
+  let currentMsg = msgState.innerText;
+  setTimeout(() => {
+    if (msgState.innerText === currentMsg) {
+      msgState.innerText = "";
+      msgState.style.padding = "0px";
+    }
+  }, 3000);
+
+  currentMsg = msgSeason.innerText;
+  setTimeout(() => {
+    if (msgSeason.innerText === currentMsg) {
+      msgSeason.innerText = "";
+      msgSeason.style.padding = "0px";
+    }
+  }, 3000);
+
+  currentMsg = msgInfo.innerText;
+  setTimeout(() => {
+    if (msgInfo.innerText === currentMsg) {
+      msgInfo.innerText = "";
+      msgInfo.style.padding = "0px";
+    }
+  }, 3000);
 }
 
 function getSoilFuzzyState(value) {
@@ -179,7 +240,9 @@ function updateMoistureVisuals() {
   const pumpingIcon = document.getElementById("fanPumpingOn");
 
   if (wateringIcon) {
-    wateringIcon.style.display = moistureControlState.watering ? "block" : "none";
+    wateringIcon.style.display = moistureControlState.watering
+      ? "block"
+      : "none";
   }
 
   if (pumpingIcon) {
@@ -189,7 +252,7 @@ function updateMoistureVisuals() {
 
 // Sterowanie wilgotnością gleby
 function syncMoistureControl() {
-  const currentSoil = parseInt(soil.value, 10);
+  const currentSoil = soil;
   const { dry, optimal, wet } = getSoilFuzzyState(currentSoil);
 
   if (moistureControlMode === "watering") {
@@ -198,20 +261,10 @@ function syncMoistureControl() {
   } else if (moistureControlMode === "pumping") {
     moistureControlState.watering = false;
     moistureControlState.pumping = true;
-  } else if (
-    smartEnabled &&
-    dry > wet &&
-    dry >= optimal &&
-    dry > 0.2
-  ) {
+  } else if (smartEnabled && dry > wet && dry >= optimal && dry > 0.2) {
     moistureControlState.watering = true;
     moistureControlState.pumping = false;
-  } else if (
-    smartEnabled &&
-    wet > dry &&
-    wet >= optimal &&
-    wet > 0.2
-  ) {
+  } else if (smartEnabled && wet > dry && wet >= optimal && wet > 0.2) {
     moistureControlState.watering = false;
     moistureControlState.pumping = true;
   } else {
@@ -224,18 +277,14 @@ function syncMoistureControl() {
 
 // Zastosowanie efektów sterowania wilgotnością gleby
 function applyMoistureControl() {
-  let currentSoil = parseInt(soil.value, 10);
+  let currentSoil = soil;
 
   if (moistureControlMode === "watering") {
     currentSoil = Math.min(100, currentSoil + 4);
-    soil.value = String(currentSoil);
-    msg.innerText = "Podlewanie aktywne: gleba jest nawadniana";
-    msg.style.background = "#5bc0de";
+    soil = String(currentSoil);
   } else if (moistureControlMode === "pumping") {
     currentSoil = Math.max(0, currentSoil - 4);
-    soil.value = String(currentSoil);
-    msg.innerText = "Odpompowywanie aktywne: nadmiar wody jest usuwany";
-    msg.style.background = "#f0ad4e";
+    soil = String(currentSoil);
   } else if (smartEnabled) {
     const { dry, wet } = getSoilFuzzyState(currentSoil);
 
@@ -245,21 +294,22 @@ function applyMoistureControl() {
       currentSoil = Math.min(100, currentSoil + 1);
     }
 
-    soil.value = String(currentSoil);
+    soil = String(currentSoil);
   }
 
-  soil.dispatchEvent(new Event("input", { bubbles: true }));
   syncMoistureControl();
   updateUI();
 }
 
 function waterFan() {
-  moistureControlMode = moistureControlMode === "watering" ? "static" : "watering";
+  moistureControlMode =
+    moistureControlMode === "watering" ? "static" : "watering";
   applyMoistureControl();
 }
 
 function pumpingFan() {
-  moistureControlMode = moistureControlMode === "pumping" ? "static" : "pumping";
+  moistureControlMode =
+    moistureControlMode === "pumping" ? "static" : "pumping";
   applyMoistureControl();
 }
 
@@ -277,9 +327,9 @@ function step(timeStep) {
   for (let i = 0; i < timeStep; i++) {
     applyMoistureControl();
 
-    let s = parseInt(soil.value, 10); // wilgotność gleby
-    let l = parseInt(light.value, 10); // światło
-    let t = parseInt(temp.value, 10); // temperatura
+    let s = soil; // wilgotność gleby
+    let l = light; // światło
+    let t = temp; // temperatura
 
     // FUZZIFICATION
     let soilDry, soilOptimal, soilWet;
@@ -307,6 +357,7 @@ function step(timeStep) {
     let night = 1 - day;
 
     // REGUŁY DLA DONICZKI
+
     // Źle jeśli jest za sucho
     let rule1 = Math.min(soilDry);
     // Źle jeśli jest za mokro
@@ -331,33 +382,31 @@ function step(timeStep) {
     health += change;
     health = Math.max(0, Math.min(100, health));
 
-    // KOMUNIKAT 
+    // KOMUNIKAT
     if (bad > 0.6) {
-      msg.innerText = "Warunki złe!";
-      msg.style.background = "#d9534f";
+      msgState.innerText = "Warunki złe!";
+      msgState.style.background = "#d9534f";
     } else if (bad > 0.3) {
-      msg.innerText = "Roślina w stresie";
-      msg.style.background = "#f0ad4e";
+      msgState.innerText = "Roślina w stresie";
+      msgState.style.background = "#f0ad4e";
     } else {
-      msg.innerText = "Warunki dobre";
-      msg.style.background = "#9fc66b";
+      msgState.innerText = "Warunki dobre";
+      msgState.style.background = "#5c832a";
     }
 
-    const currentMsg = msg.innerText;
-    setTimeout(() => {
-      if (msg.innerText === currentMsg) {
-        msg.innerText = "";
-        msg.style.padding = "0px";
-      }
-    }, 5000);
-
-    // CZAS 
+    // CZAS
     time = (time + 1) % 24;
     if (time === 0) {
-      howDay += 1;
+      totalDay += 1;
+      seasonDay += 1;
+
+      const seasonLength = parseInt(days.value, 10) || 10;
+      if (seasonDay >= seasonLength) {
+        nextSeason();
+      }
     }
-    howDay = Math.max(0, howDay);
-    howDay = Math.min(howDay, 999);
+    totalDay = Math.max(0, totalDay);
+    totalDay = Math.min(totalDay, 999);
     updateHistory();
   }
 
@@ -375,20 +424,48 @@ function step(timeStep) {
 // AKCJE GRY
 function changePlant(newPlant) {
   plant = newPlant;
-  health = 50; // zdrowie rośliny
-  msg.innerText = "Zmieniłeś roślinę na " + plant;
 
-  resetHistory();
+  health = parseInt(healthNewPlant.value, 10); // zdrowie rośliny
+  soil = parseInt(soilNewPlant.value, 10); // wilgotność gleby
+  light = parseInt(lightNewPlant.value, 10); // światło
+  temp = parseInt(tempNewPlant.value, 10); // temperatura
+
+  msgInfo.innerText = "Zmieniłeś roślinę na " + plant;
+  msgInfo.style.background = "var(--primary-color)";
+
   updateUI();
 }
 
-function changeSeason(newSeason) {
-  season = newSeason; 
-  health = 50; // zdrowie rośliny
-  time = 8; // czas
-  howDay = 0; // dzień
-  msg.innerText = "Zmieniono porę roku na " + season + ".\nKażda pora roku będzie wynosić " + howDay + " dni.";
+// Automatyczna zmiana pory roku co days.value dni
+function nextSeason() {
+  const currentIndex = seasons.indexOf(season);
+  if (currentIndex !== -1) {
+    const nextIndex = (currentIndex + 1) % seasons.length;
+    season = seasons[nextIndex];
+    seasonDay = 0;
+    msg.innerText = "Nastała pora roku: " + season;
+    msgInfo.style.background = "var(--primary-color)";
+  }
+  updateUI();
+}
 
+// Zmiana pory roku (logika przycisku)
+function changeSeason(newSeason) {
+  season = newSeason;
+  changePlant(plant); // reset rośliny do domyślnej przy zmianie pory roku
+
+  time = 8; // czas
+  totalDay = 0; // dzień
+  seasonDay = 0; // reset liczby dni w sezonie
+  msgSeason.innerText =
+    "Zmieniono porę roku na " +
+    season +
+    ".\nKażda pora roku będzie wynosić " +
+    days.value +
+    " dni.";
+  msgSeason.style.background = "var(--primary-color)";
+
+  resetHistory();
   updateUI();
 }
 

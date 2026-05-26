@@ -25,10 +25,10 @@ function updateHistory() {
   }
 
   history.time.push(time);
-  history.health.push(Math.round(health));
-  history.soil.push(parseInt(soil.value, 10));
-  history.light.push(parseInt(light.value, 10));
-  history.temp.push(parseInt(temp.value, 10));
+  history.health.push(health);
+  history.soil.push(soil);
+  history.light.push(light);
+  history.temp.push(temp);
 
   updateHistoryChart();
 }
@@ -106,7 +106,7 @@ function drawFuzzyTemp() {
     ctx.fillText(params.labels[idx], width - 80, 35 + idx * 16);
   });
 
-  const currentValue = parseInt(document.getElementById("temp").value, 10);
+  const currentValue = temp;
   const markerX =
     padding + ((width - padding - 15) * currentValue) / params.xMax;
   ctx.setLineDash([4, 3]);
@@ -170,11 +170,7 @@ function drawFuzzySoil() {
   });
 
   const currentValue =
-    variable === "soil"
-      ? parseInt(document.getElementById("soil").value, 10)
-      : variable === "light"
-        ? parseInt(document.getElementById("light").value, 10)
-        : parseInt(document.getElementById("temp").value, 10);
+    variable === "soil" ? soil : variable === "light" ? light : temp;
   const markerX =
     padding + ((width - padding - 15) * currentValue) / params.xMax;
 
@@ -239,7 +235,7 @@ function drawFuzzyLight() {
     ctx.fillText(params.labels[idx], width - 80, 35 + idx * 16);
   });
 
-  const currentValue = parseInt(document.getElementById("light").value, 10);
+  const currentValue = light;
   const markerX =
     padding + ((width - padding - 15) * currentValue) / params.xMax;
   ctx.setLineDash([4, 3]);
