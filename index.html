@@ -32,8 +32,8 @@
           <div class="clock">
             <img id="clock" src="img/clock/clock.png" alt="Zegar" />
             <p id="clockTime"><span id="time">8</span>:00</p>
-            <p id="clockDay">Dzień: <span id="day">100</span></p>
-            <img id="clockSession" src="img/clock/summer.png" alt="PoraRoku" />
+            <p id="clockDay">Dzień: <span id="day">0</span></p>
+            <img id="clockSeason" alt="PoraRoku" />
             <p id="clockTemperature"><span id="actuallytemp">20</span>°C</p>
             <button id="buttonNextHour" title="Następna godzina" onclick="step(1)"></button>
             <button id="buttonNextDay" title="Następny dzień" onclick="step(24)"></button>
@@ -72,7 +72,7 @@
           <!-- ROŚLINA + DONICZKA -->
           <div class="pot">
             <!-- roślina -->
-            <img id="plant" src="img/pot/flowers/orchid_good.png" alt="Kwiatek" />
+            <img id="plant" alt="Kwiatek" />
             <!-- doniczka -->
             <img id="pot" src="img/pot/pot/pot.png" alt="Doniczka" />
             <img id="potSmartOn" src="img/pot/notification/smart_on.png" alt="SMART włączony" />
@@ -123,7 +123,7 @@
           </button>
         </div>
         <hr />
-        <p class="text-secondary">Zdrowie: <span id="health">80</span>%</p>
+        <p class="text-secondary">Zdrowie: <span id="healthNewPlant">50</span>%</p>
         <input type="range" id="healthRange" min="0" max="100" value="80" class="w-75" />
 
         <p class="text-secondary">

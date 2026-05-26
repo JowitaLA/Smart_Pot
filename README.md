@@ -15,11 +15,12 @@ Tryb SMART (uzupełnianie wody i włączanie sztucznej lampy/zasywanie i odsuwan
 
 # Parametry
 - [x] Wykres wilgotności gleby
-- [ ] Przycisk - podlej/oszusz
+- [x] Przycisk - podlej/oszusz
 - [ ] Tryb SMART - pobieranie wody ze zbiornika/odpompowywanie
 
-- [ ] Wykres światła gleby
-- [ ] Przycisk - zasłonięcie/odsłonięcie rolety (jak dzień) bądź zaświecenie/zgaszenie sztucznej lampy (jak noc/zła pogoda)
+- [x] Wykres światła gleby
+- [x] Przycisk - zasłonięcie/odsłonięcie rolety 
+- [ ] Przycisk - zaświecenie/zgaszenie sztucznej lampy (jak noc/zła pogoda)
 - [ ] Tryb SMART - sterowanie roletą i lampą
 
 - [ ] Wykres temperatury
@@ -47,7 +48,7 @@ Tryb SMART (uzupełnianie wody i włączanie sztucznej lampy/zasywanie i odsuwan
 ---
 - [ ]  Pory roku:
 - [ ]    - Custom ,,pora roku": własna zmiana zakresu wilgotności, światła, temperatury, początkowego zdrowia i godziny.
-- [ ]    - Na urządzeniu z temperaturą będzie również pokazana ilość dni i pora roku
+- [x]    - Na urządzeniu z temperaturą będzie również pokazana ilość dni i pora roku
 
 - [ ]    - Co 10 dni zmienia się pora roku (korzystanie z danych z 2025 roku w PL, ):
 - [ ]        TEMPERATURA

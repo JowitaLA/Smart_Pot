@@ -198,24 +198,26 @@ input[type="range"] {
   font-weight: italic;
   padding: 10px;
 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
 
   opacity: 1;
   pointer-events: auto;
   transition: 0.3s ease;
+
   z-index: 10;
 }
 
 /* ŻALUZJA */
 /* Żaluzja */
 .shutter {
+  display: none;
+
   position: absolute;
   background: rgba(111, 95, 75, 0.313);
   width: 100%;
   height: 90%;
   right: 0;
   top: 0;
-  display: none;
   z-index: 0;
 }
 
@@ -261,7 +263,7 @@ input[type="range"] {
 }
 
 /* Pora roku */
-#clockSession {
+#clockSeason {
   position: absolute;
   max-width: 20%;
   left: 24px;
@@ -604,7 +606,7 @@ input[type="range"] {
     right: 18px;
   }
 
-  #clockSession {
+  #clockSeason {
     left: 18px;
   }
 
@@ -628,7 +630,7 @@ input[type="range"] {
     right: 20px;
   }
 
-  #clockSession {
+  #clockSeason {
     left: 16px;
   }
 
@@ -653,7 +655,7 @@ input[type="range"] {
     right: 11px;
   }
 
-  #clockSession {
+  #clockSeason {
     left: 11px;
   }
 
@@ -680,7 +682,7 @@ input[type="range"] {
     right: 15px;
   }
 
-  #clockSession {
+  #clockSeason {
     left: 15px;
   }
 
@@ -699,7 +701,7 @@ input[type="range"] {
 
   #clockTime,
   #clockDay,
-  #clockSession,
+  #clockSeason,
   #clockTemperature {
     font-size: 0.9rem;
   }
@@ -714,7 +716,7 @@ input[type="range"] {
     bottom: 20%;
   }
 
-  #clockSession {
+  #clockSeason {
     left: 12px;
   }
 

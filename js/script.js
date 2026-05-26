@@ -8,8 +8,10 @@ function triangle(x, a, b, c) {
 
 // ZMIENNE GRY
 let time = 8; // czas
+let howDay = 0; // dzień
 let health = 20; // zdrowie rośliny
-let plant = "storczyk"; // podstawowa roślinatzzt
+let season = "winter"; // pora roku: summer | autumn | winter | spring
+let plant = "storczyk"; // podstawowa roślina
 let smartEnabled = false;
 let moistureControlState = {
   watering: false,
@@ -27,6 +29,8 @@ const chartVarSelect = document.getElementById("chartVar");
 const fuzzySoilChart = document.getElementById("fuzzySoil");
 const fuzzyLightChart = document.getElementById("fuzzyLight");
 const fuzzyTempChart = document.getElementById("fuzzyTemp");
+const days = document.getElementById("dayVal");
+const healthNewPlant = document.getElementById("healthNewPlant");
 
 // PARAMETRY ROŚLIN
 const plantFuzzyConfig = {
@@ -133,14 +137,17 @@ light.addEventListener("input", updateUI);
 temp.addEventListener("input", updateUI);
 chartVarSelect?.addEventListener("change", updateUI);
 
+
 // UI
 function updateUI() {
   document.getElementById("time").innerText = time;
+  document.getElementById("day").innerText = howDay;
+  document.getElementById("clockSeason").src = "img/clock/" + season + ".png";
   document.getElementById("health").innerText = Math.round(health);
   document.getElementById("soilVal").innerText = soil.value;
   document.getElementById("lightVal").innerText = light.value;
   document.getElementById("tempVal").innerText = temp.value;
-
+  document.getElementById("plant").src = "img/pot/flowers/" + (plant == "storczyk" ? "orchid" : plant == "kaktus" ? "cactus" : "fern") + "_" + (health > 50 ? "good" : health > 30 ? "ok" : "bad") + ".png";
   const smartIcon = document.getElementById("potSmartOn");
   if (smartIcon) {
     smartIcon.style.display = smartEnabled ? "block" : "none";
@@ -346,6 +353,11 @@ function step(timeStep) {
 
     // CZAS 
     time = (time + 1) % 24;
+    if (time === 0) {
+      howDay += 1;
+    }
+    howDay = Math.max(0, howDay);
+    howDay = Math.min(howDay, 999);
     updateHistory();
   }
 
@@ -363,17 +375,26 @@ function step(timeStep) {
 // AKCJE GRY
 function changePlant(newPlant) {
   plant = newPlant;
-  time = 8; // czas
-  health = 20; // zdrowie rośliny
+  health = 50; // zdrowie rośliny
   msg.innerText = "Zmieniłeś roślinę na " + plant;
 
   resetHistory();
   updateUI();
 }
 
+function changeSeason(newSeason) {
+  season = newSeason; 
+  health = 50; // zdrowie rośliny
+  time = 8; // czas
+  howDay = 0; // dzień
+  msg.innerText = "Zmieniono porę roku na " + season + ".\nKażda pora roku będzie wynosić " + howDay + " dni.";
+
+  updateUI();
+}
+
 function toggleShutter() {
   const shutter = document.querySelector(".shutter");
-  shutter.style.display = shutter.style.display === "none" ? "block" : "none";
+  shutter.style.display = shutter.style.display === "block" ? "none" : "block";
   updateUI();
 }
 
