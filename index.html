@@ -48,8 +48,8 @@
             <img id="lampLightOn" src="img/lamp/light_mode.png" alt="Oświetlanie włączone" />
             <img id="lampHeaterOn" src="img/lamp/hot_mode.png" alt="Grzanie włączone" />
 
-            <button id="buttonLight" title="Oświetlanie" onclick="light()"></button>
-            <button id="buttonHeater" title="Grzanie" onclick="heater()"></button>
+            <button id="buttonLight" title="Oświetlanie" onclick="toggleLight()"></button>
+            <button id="buttonHeater" title="Grzanie" onclick="toggleHeater()"></button>
           </div>
 
           <div class="fan">
@@ -262,9 +262,28 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- 1. Stan gry i podstawowe zmienne -->
   <script src="js/script.js"></script>
+
+  <!-- 2. Zmiana pory roku lub rośliny -->
   <script src="js/addons.js"></script>
+
+  <!-- 3. Pobranie użytych przez użytkownika akcji -->
+  <script src="js/actions.js"></script>
+
+  <!-- 4. Zarządzanie rzeczami w czasie -->
+  <script src="js/time.js"></script>
+
+  <!-- 5. Zachowanie rośliny oraz parametrów ze względu na czas i akcje -->
+  <script src="js/pot.js"></script>
+  
+  <!-- 6. Malowanie wykresów -->
   <script src="js/chart.js"></script>
+
+  <!-- 7. Aktualizacja danych -->
+  <script src="js/update.js"></script>
+
 </body>
 
 </html>

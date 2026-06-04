@@ -1,3 +1,5 @@
+// Plik z funkcją zmiany zakresów dla gry custom oraz aktualizacją roku w stopce.
+
 // Ustaw aktualny rok w stopce
 const year = new Date().getFullYear();
 document.getElementById("year").textContent = year;

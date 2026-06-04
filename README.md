@@ -47,10 +47,10 @@ Tryb SMART (uzupełnianie wody i włączanie sztucznej lampy/zasywanie i odsuwan
     
 ---
 - [ ]  Pory roku:
-- [ ]    - Custom ,,pora roku": własna zmiana zakresu wilgotności, światła, temperatury, początkowego zdrowia i godziny.
+- [ ]    - Custom ,,pora roku": własna zmiana zakresu wilgotności, światła, temperatury.
 - [x]    - Na urządzeniu z temperaturą będzie również pokazana ilość dni i pora roku
 
-- [ ]    - Co 10 dni zmienia się pora roku (korzystanie z danych z 2025 roku w PL, ):
+- [x]    - Co 10 dni zmienia się pora roku (korzystanie z danych z 2025 roku w PL):
 - [ ]        TEMPERATURA
 - [ ]        - Zima: -25 stopni do +5 stopni
 - [ ]        - Wiosna: 0 stopni do 22 stopni

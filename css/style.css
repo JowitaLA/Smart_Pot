@@ -403,7 +403,37 @@ input[type="range"] {
 
 #lampLight,
 #lampHeater {
-  opacity: 0.75;
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+#lampLight.visible,
+#lampHeater.visible {
+  opacity: 0.9;
+  transform: translateY(-8px);
+}
+
+#lampLightOn,
+#lampHeaterOn {
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
+  filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+}
+
+#lampLightOn.visible,
+#lampHeaterOn.visible {
+  opacity: 1;
+  transform: translateY(-8px);
+}
+
+#lampLightOn.visible {
+  filter: drop-shadow(0 0 16px rgba(255, 229, 120, 0.85));
+}
+
+#lampHeaterOn.visible {
+  filter: drop-shadow(0 0 18px rgba(255, 130, 60, 0.95));
 }
 
 /* Przycisk lampy */
@@ -487,7 +517,19 @@ input[type="range"] {
 
 #fanWind,
 #fanSplatter {
-  opacity: 0.75;
+  /* domyślnie ukryte — pojawiają się animacją */
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+
+  z-index: 2 !important;
+}
+
+/* Widoczny stan: płynne pojawianie się i lekkie uniesienie */
+#fanWind.visible,
+#fanSplatter.visible {
+  opacity: 0.9;
+  transform: translateY(-8px);
 }
 
 /* Przycisk lampy */
@@ -758,4 +800,16 @@ input[type="range"] {
   #clockTemperature {
     left: 18px;
   }
+}
+
+/* Animacje dla wentylacji i zraszania */
+
+#fanWindOn {
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+#fanSplatterOn {
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
 }

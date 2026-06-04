@@ -1,49 +1,43 @@
-// FUNKCJE PRZYNALEŻNOŚCI
-function triangle(x, a, b, c) {
-  if (x <= a || x >= c) return 0;
-  if (x == b) return 1;
-  if (x > a && x < b) return (x - a) / (b - a);
-  return (c - x) / (c - b);
-}
-
 // ZMIENNE GRY
+// 1. Czas
 const seasons = ["winter", "spring", "summer", "autumn"]; // pory roku
 
-let time = 8; // czas
-let totalDay = 0; // dzień
-let seasonDay = 0;
+let time = 8;       // godzina
+let totalDay = 0;   // dzień
+let seasonDay = 0;  // dzień w aktualnej porze roku
 
-let season = "spring"; // aktualna pora roku: summer | autumn | winter | spring
-let plant = "storczyk"; // podstawowa roślina: storczyk | kaktus | paprotka
-let smartEnabled = false;
+// 2. Podstawowe parametry rośliny i doniczki
+let season = "spring";  // aktualna pora roku
+let plant = "storczyk"; // aktualna roślina (domyślnie storczyk, można zmieniać na kaktus lub paprotkę)
 
-let soil = 50; // wilgotność gleby
-let light = 50; // światło
-let temp = 20; // temperatura
-let health = 80; // zdrowie rośliny
+let soil = 50;    // wilgotność gleby
+let light = 50;   // światło
+let temp = 20;    // temperatura
+let health = 80;  // zdrowie rośliny (0-100)
 
-let moistureControlState = {
-  watering: false,
-  pumping: false,
-};
-let moistureControlMode = "static"; // static | watering | pumping
+// Device control variables moved to js/actions.js
+let smartMode = false;
 
 // POBIERANIE ELEMENTÓW
+// 1. Wiadomości
 const msgState = document.getElementById("msgState");
 const msgInfo = document.getElementById("msgInfo");
 const msgSeason = document.getElementById("msgSeason");
 
+// 2. Elementy interfejsu
 const sky = document.getElementById("sky");
-const chartVarSelect = document.getElementById("chartVar");
 
+// 3. Wykresy rozmyte
+const chartVarSelect = document.getElementById("chartVar");
 const fuzzySoilChart = document.getElementById("fuzzySoil");
 const fuzzyLightChart = document.getElementById("fuzzyLight");
 const fuzzyTempChart = document.getElementById("fuzzyTemp");
 
+// 4. Kontrolki nowych roślin
+const healthNewPlant = document.getElementById("healthNewPlant");
 const soilNewPlant = document.getElementById("soilNewPlant");
 const lightNewPlant = document.getElementById("lightNewPlant");
 const tempNewPlant = document.getElementById("tempNewPlant");
-const healthNewPlant = document.getElementById("healthNewPlant");
 
 const days = document.getElementById("days");
 
@@ -147,6 +141,14 @@ const plantFuzzyConfig = {
   },
 };
 
+// FUNKCJE PRZYNALEŻNOŚCI
+function triangle(x, a, b, c) {
+  if (x <= a || x >= c) return 0;
+  if (x == b) return 1;
+  if (x > a && x < b) return (x - a) / (b - a);
+  return (c - x) / (c - b);
+}
+
 soilNewPlant.addEventListener("input", updateUI);
 lightNewPlant.addEventListener("input", updateUI);
 tempNewPlant.addEventListener("input", updateUI);
@@ -155,73 +157,6 @@ healthNewPlant.addEventListener("input", updateUI);
 days.addEventListener("input", updateUI);
 
 chartVarSelect?.addEventListener("change", updateUI);
-
-// UI
-function updateUI() {
-  document.getElementById("time").innerText = time;
-  document.getElementById("day").innerText = totalDay;
-  document.getElementById("dayVal").innerText = days.value;
-
-  document.getElementById("soilVal").innerText = soil;
-  document.getElementById("lightVal").innerText = light;
-  document.getElementById("tempVal").innerText = temp;
-  document.getElementById("healthVal").innerText = health;
-
-  document.getElementById("clockSeason").src = "img/clock/" + season + ".png";
-
-  document.getElementById("soilNewPlantVal").innerText = soilNewPlant.value;
-  document.getElementById("lightNewPlantVal").innerText = lightNewPlant.value;
-  document.getElementById("tempNewPlantVal").innerText = tempNewPlant.value;
-  document.getElementById("healthNewPlantVal").innerText = healthNewPlant.value;
-
-  document.getElementById("plant").src =
-    "img/pot/flowers/" +
-    (plant == "storczyk" ? "orchid" : plant == "kaktus" ? "cactus" : "fern") +
-    "_" +
-    (health > 50 ? "good" : health > 30 ? "ok" : "bad") +
-    ".png";
-
-  const smartIcon = document.getElementById("potSmartOn");
-  if (smartIcon) {
-    smartIcon.style.display = smartEnabled ? "block" : "none";
-  }
-
-  syncMoistureControl();
-
-  // Dzień / noc
-  let day = triangle(time, 6, 12, 18);
-  sky.style.background = day > 0.6 ? "#74bcd4" : day > 0.2 ? "#a46d08" : "#333";
-
-  drawFuzzyChart();
-
-  msgState.style.padding = "10px";
-  msgInfo.style.padding = "10px";
-  msgSeason.style.padding = "10px";
-
-  let currentMsg = msgState.innerText;
-  setTimeout(() => {
-    if (msgState.innerText === currentMsg) {
-      msgState.innerText = "";
-      msgState.style.padding = "0px";
-    }
-  }, 3000);
-
-  currentMsg = msgSeason.innerText;
-  setTimeout(() => {
-    if (msgSeason.innerText === currentMsg) {
-      msgSeason.innerText = "";
-      msgSeason.style.padding = "0px";
-    }
-  }, 3000);
-
-  currentMsg = msgInfo.innerText;
-  setTimeout(() => {
-    if (msgInfo.innerText === currentMsg) {
-      msgInfo.innerText = "";
-      msgInfo.style.padding = "0px";
-    }
-  }, 3000);
-}
 
 function getSoilFuzzyState(value) {
   const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
@@ -235,87 +170,11 @@ function getSoilFuzzyState(value) {
 }
 
 // Wilgotność gleby: wyświetlanie powiadomień
-function updateMoistureVisuals() {
-  const wateringIcon = document.getElementById("fanWateringOn");
-  const pumpingIcon = document.getElementById("fanPumpingOn");
-
-  if (wateringIcon) {
-    wateringIcon.style.display = moistureControlState.watering
-      ? "block"
-      : "none";
-  }
-
-  if (pumpingIcon) {
-    pumpingIcon.style.display = moistureControlState.pumping ? "block" : "none";
-  }
-}
-
-// Sterowanie wilgotnością gleby
-function syncMoistureControl() {
-  const currentSoil = soil;
-  const { dry, optimal, wet } = getSoilFuzzyState(currentSoil);
-
-  if (moistureControlMode === "watering") {
-    moistureControlState.watering = true;
-    moistureControlState.pumping = false;
-  } else if (moistureControlMode === "pumping") {
-    moistureControlState.watering = false;
-    moistureControlState.pumping = true;
-  } else if (smartEnabled && dry > wet && dry >= optimal && dry > 0.2) {
-    moistureControlState.watering = true;
-    moistureControlState.pumping = false;
-  } else if (smartEnabled && wet > dry && wet >= optimal && wet > 0.2) {
-    moistureControlState.watering = false;
-    moistureControlState.pumping = true;
-  } else {
-    moistureControlState.watering = false;
-    moistureControlState.pumping = false;
-  }
-
-  updateMoistureVisuals();
-}
-
-// Zastosowanie efektów sterowania wilgotnością gleby
-function applyMoistureControl() {
-  let currentSoil = soil;
-
-  if (moistureControlMode === "watering") {
-    currentSoil = Math.min(100, currentSoil + 4);
-    soil = String(currentSoil);
-  } else if (moistureControlMode === "pumping") {
-    currentSoil = Math.max(0, currentSoil - 4);
-    soil = String(currentSoil);
-  } else if (smartEnabled) {
-    const { dry, wet } = getSoilFuzzyState(currentSoil);
-
-    if (wet > dry && wet > 0.2) {
-      currentSoil = Math.max(0, currentSoil - 1);
-    } else if (dry > wet && dry > 0.2) {
-      currentSoil = Math.min(100, currentSoil + 1);
-    }
-
-    soil = String(currentSoil);
-  }
-
-  syncMoistureControl();
-  updateUI();
-}
-
-function waterFan() {
-  moistureControlMode =
-    moistureControlMode === "watering" ? "static" : "watering";
-  applyMoistureControl();
-}
-
-function pumpingFan() {
-  moistureControlMode =
-    moistureControlMode === "pumping" ? "static" : "pumping";
-  applyMoistureControl();
-}
+// Device control functions moved to js/actions.js
 
 function toggleSmartMode() {
-  smartEnabled = !smartEnabled;
-  if (!smartEnabled) {
+  smartMode = !smartMode;
+  if (!smartMode) {
     moistureControlMode = "static";
   }
   syncMoistureControl();
@@ -326,6 +185,8 @@ function toggleSmartMode() {
 function step(timeStep) {
   for (let i = 0; i < timeStep; i++) {
     applyMoistureControl();
+    applyTempControl();
+    if (typeof applyLampControl === 'function') applyLampControl();
 
     let s = soil; // wilgotność gleby
     let l = light; // światło
@@ -484,5 +345,4 @@ window.addEventListener("load", () => {
 // PODPIĘCIE DO OKNA
 window.step = step;
 window.changePlant = changePlant;
-window.waterFan = waterFan;
-window.pumpingFan = pumpingFan;
+// Actions (waterFan, pumpingFan, toggles) are provided by js/actions.js
