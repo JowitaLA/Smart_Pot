@@ -7,6 +7,7 @@ function updateUI() {
   document.getElementById("soilVal").innerText = soil;
   document.getElementById("lightVal").innerText = light;
   document.getElementById("tempVal").innerText = temp;
+  document.getElementById("actuallytemp").innerText = temp;
   document.getElementById("healthVal").innerText = health;
 
   document.getElementById("clockSeason").src = "../img/clock/" + season + ".png";
@@ -31,6 +32,10 @@ function updateUI() {
   syncMoistureControl();
   syncTempControl();
   if (typeof syncLampControl === 'function') syncLampControl();
+
+  // Aktualizacja statusu doniczki i notyfikacji
+  updatePotStatus();
+  updatePotNotifications();
 
   // Dzień / noc
   let day = triangle(time, 6, 12, 18);

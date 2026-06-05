@@ -4,6 +4,66 @@
 const year = new Date().getFullYear();
 document.getElementById("year").textContent = year;
 
+// PRZYCISKI PONIŻEJ SYMULACJI --- tylko aktualizuj etykiety pod suwakami
+soilNewPlant.addEventListener("input", () => {
+  const el = document.getElementById("soilNewPlantVal");
+  if (el) el.innerText = soilNewPlant.value;
+});
+lightNewPlant.addEventListener("input", () => {
+  const el = document.getElementById("lightNewPlantVal");
+  if (el) el.innerText = lightNewPlant.value;
+});
+tempNewPlant.addEventListener("input", () => {
+  const el = document.getElementById("tempNewPlantVal");
+  if (el) el.innerText = tempNewPlant.value;
+});
+healthNewPlant.addEventListener("input", () => {
+  const el = document.getElementById("healthNewPlantVal");
+  if (el) el.innerText = healthNewPlant.value;
+});
+
+// suwak dni
+days.addEventListener("input", () => {
+  const el = document.getElementById("dayVal");
+  if (el) el.innerText = days.value;
+});
+
+// Zmiana rośliny
+function changePlant(newPlant) {
+  plant = newPlant;
+
+  health = parseInt(healthNewPlant.value, 10); // zdrowie rośliny
+  soil = parseInt(soilNewPlant.value, 10); // wilgotność gleby
+  light = parseInt(lightNewPlant.value, 10); // światło
+  temp = parseInt(tempNewPlant.value, 10); // temperatura
+
+  msgInfo.innerText = "Zmieniłeś roślinę na " + plant;
+  msgInfo.style.background = "var(--primary-color)";
+
+  resetHistory();
+  updateUI();
+}
+
+// Zmiana pory roku
+function changeSeason(newSeason) {
+  season = newSeason;
+  changePlant(plant); // reset rośliny do domyślnej przy zmianie pory roku
+
+  time = 8; // czas
+  totalDay = 0; // dzień
+  seasonDay = 0; // reset liczby dni w sezonie
+  msgSeason.innerText =
+    "Zmieniono porę roku na " +
+    season +
+    ".\nKażda pora roku będzie wynosić " +
+    days.value +
+    " dni.";
+  msgSeason.style.background = "var(--primary-color)";
+
+  resetHistory();
+  updateUI();
+}
+
 // ZAKRESY DLA GRY CUSTOM
 // Pobierz elementy input i label dla temperatury
 const customTempMin = document.getElementById("customTempMin");
@@ -58,3 +118,7 @@ customLightMax.addEventListener("input", () => {
   }
   lightRangeMax.textContent = customLightMax.value;
 });
+
+
+window.changePlant = changePlant;
+window.changeSeason = changeSeason;

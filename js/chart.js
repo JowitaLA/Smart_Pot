@@ -55,6 +55,7 @@ function getFuzzyParams(variable) {
   }
 
   return {
+    xMin: variable === "temp" ? -25 : 0,
     xMax: config.xMax,
     sets: config.sets,
     labels: config.labels,
@@ -72,6 +73,8 @@ function drawFuzzyTemp() {
   const width = fuzzyTemp.width;
   const height = fuzzyTemp.height;
   const padding = 30;
+  const xMin = params.xMin ?? 0;
+  const xMax = params.xMax;
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "rgba(255,255,255,0.9)";
   ctx.fillRect(0, 0, width, height);
@@ -84,18 +87,18 @@ function drawFuzzyTemp() {
   ctx.stroke();
   ctx.fillStyle = "#222";
   ctx.font = "12px Arial";
-  ctx.fillText("0", padding - 5, height - padding + 14);
-  ctx.fillText(params.xMax.toString(), width - 18, height - padding + 14);
+  ctx.fillText(xMin.toString(), padding - 5, height - padding + 14);
+  ctx.fillText(xMax.toString(), width - 18, height - padding + 14);
   ctx.fillText(params.title, padding, 18);
 
   params.sets.forEach((set, idx) => {
     ctx.strokeStyle = params.colors[idx];
     ctx.beginPath();
-    for (let x = 0; x <= params.xMax; x += 1) {
+    for (let x = xMin; x <= xMax; x += 1) {
       const value = triangle(x, set[0], set[1], set[2]);
-      const px = padding + ((width - padding - 15) * x) / params.xMax;
+      const px = padding + ((width - padding - 15) * (x - xMin)) / (xMax - xMin);
       const py = height - padding - value * (height - padding - 15);
-      if (x === 0) {
+      if (x === xMin) {
         ctx.moveTo(px, py);
       } else {
         ctx.lineTo(px, py);
@@ -108,7 +111,7 @@ function drawFuzzyTemp() {
 
   const currentValue = temp;
   const markerX =
-    padding + ((width - padding - 15) * currentValue) / params.xMax;
+    padding + ((width - padding - 15) * (currentValue - xMin)) / (xMax - xMin);
   ctx.setLineDash([4, 3]);
   ctx.strokeStyle = "#333";
   ctx.beginPath();
@@ -362,7 +365,7 @@ function initHistoryChart() {
           type: "linear",
           display: false,
           position: "right",
-          min: 0,
+          min: -25,
           max: 40,
         },
       },
