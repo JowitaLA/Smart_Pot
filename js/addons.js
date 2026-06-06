@@ -46,6 +46,7 @@ function changePlant(newPlant) {
 
 // Zmiana pory roku
 function changeSeason(newSeason) {
+  customSeasonActive = false;
   season = newSeason;
   changePlant(plant); // reset rośliny do domyślnej przy zmianie pory roku
 
@@ -58,6 +59,35 @@ function changeSeason(newSeason) {
     ".\nKażda pora roku będzie wynosić " +
     days.value +
     " dni.";
+  msgSeason.style.background = "var(--primary-color)";
+
+  resetHistory();
+  updateUI();
+}
+
+function changeCustom() {
+  customSeasonActive = true;
+  season = "custom";
+  time = 8;
+  totalDay = 0;
+  seasonDay = 0;
+
+  customSeasonConfig.tempMin = parseInt(customTempMin.value, 10);
+  customSeasonConfig.tempMax = parseInt(customTempMax.value, 10);
+  customSeasonConfig.lightMin = parseInt(customLightMin.value, 10);
+  customSeasonConfig.lightMax = parseInt(customLightMax.value, 10);
+  customSeasonConfig.soilDrain = parseFloat(customSoilDrain.value);
+
+  const minTemp = Math.min(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
+  const maxTemp = Math.max(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
+  const minLight = Math.min(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
+  const maxLight = Math.max(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
+
+  temp = (minTemp + Math.random() * (maxTemp - minTemp)).toFixed(1);
+  light = String(Math.round(minLight + Math.random() * (maxLight - minLight)));
+  soil = String(Math.round(20 + Math.random() * 60));
+
+  msgSeason.innerText = "Tryb własny uruchomiony. Własna pora roku aktywna.";
   msgSeason.style.background = "var(--primary-color)";
 
   resetHistory();
@@ -83,22 +113,11 @@ customTempMax.addEventListener("input", () => {
   tempRangeMax.textContent = customTempMax.value;
 });
 
-// Pobierz elementy input i label dla wilgotności
-const customSoilMin = document.getElementById("customSoilMin");
-const customSoilMax = document.getElementById("customSoilMax");
-const soilRangeMin = document.getElementById("soilRangeMin");
-const soilRangeMax = document.getElementById("soilRangeMax");
-customSoilMin.addEventListener("input", () => {
-  if (parseInt(customSoilMin.value) > parseInt(customSoilMax.value)) {
-    customSoilMin.value = customSoilMax.value;
-  }
-  soilRangeMin.textContent = customSoilMin.value;
-});
-customSoilMax.addEventListener("input", () => {
-  if (parseInt(customSoilMax.value) < parseInt(customSoilMin.value)) {
-    customSoilMax.value = customSoilMin.value;
-  }
-  soilRangeMax.textContent = customSoilMax.value;
+// Pobierz elementy input i label dla pobierania wody
+const customSoilDrain = document.getElementById("customSoilDrain");
+const soilDrainVal = document.getElementById("soilDrainVal");
+customSoilDrain.addEventListener("input", () => {
+  soilDrainVal.textContent = Number(customSoilDrain.value).toFixed(2);
 });
 
 // Pobierz elementy input i label dla światła
@@ -122,3 +141,4 @@ customLightMax.addEventListener("input", () => {
 
 window.changePlant = changePlant;
 window.changeSeason = changeSeason;
+window.changeCustom = changeCustom;

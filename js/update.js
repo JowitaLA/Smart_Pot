@@ -10,7 +10,8 @@ function updateUI() {
   document.getElementById("actuallytemp").innerText = temp;
   document.getElementById("healthVal").innerText = health;
 
-  document.getElementById("clockSeason").src = "img/clock/" + season + ".png";
+  const seasonIcon = customSeasonActive ? "custom" : season;
+  document.getElementById("clockSeason").src = "img/clock/" + seasonIcon + ".png";
 
   document.getElementById("soilNewPlantVal").innerText = soilNewPlant.value;
   document.getElementById("lightNewPlantVal").innerText = lightNewPlant.value;

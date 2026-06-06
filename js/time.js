@@ -1,8 +1,26 @@
 // Parametry w doniczce
+function getCustomLightPercent(hour) {
+  const minLight = Math.min(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
+  const maxLight = Math.max(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
+
+  if (hour >= 0 && hour <= 4) return 0;
+  if (hour >= 5 && hour <= 7) return minLight * 0.6;
+  if (hour >= 8 && hour <= 11) return (minLight + maxLight) / 2;
+  if (hour >= 12 && hour <= 14) return maxLight;
+  if (hour >= 15 && hour <= 19) return (minLight + maxLight) / 2;
+  return 0;
+}
+
 function getSeasonLightPercent(seasonName, hour) {
   const schedule = seasonLightSchedule[seasonName] || seasonLightSchedule.spring;
   const entry = schedule.find((item) => hour >= item.from && hour <= item.to);
   return entry ? entry.value : 0;
+}
+
+function randomCustomTemperature() {
+  const minTemp = Math.min(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
+  const maxTemp = Math.max(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
+  return minTemp + Math.random() * (maxTemp - minTemp);
 }
 
 function randomSeasonTemperature(seasonName) {
@@ -18,18 +36,24 @@ function applyNaturalEnvironment() {
   let currentTemp = Number(temp);
   let currentSoil = Number(soil);
 
-  const scheduledLight = getSeasonLightPercent(season, time);
+  const scheduledLight = customSeasonActive
+    ? getCustomLightPercent(time)
+    : getSeasonLightPercent(season, time);
   currentLight = Math.max(
     0,
     Math.min(100, scheduledLight + (Math.random() * 10 - 5)),
   );
 
-  const targetTemp = randomSeasonTemperature(season);
+  const targetTemp = customSeasonActive
+    ? randomCustomTemperature()
+    : randomSeasonTemperature(season);
   currentTemp += (targetTemp - currentTemp) * plantRates.tempAdaptation;
   currentTemp = Number(currentTemp.toFixed(1));
 
   const soilDrain =
-    seasonSoilDrain[season] + dayFactor * 0.1 + (currentTemp > 24 ? 0.2 : 0);
+    (customSeasonActive ? customSeasonConfig.soilDrain : seasonSoilDrain[season]) +
+    dayFactor * 0.1 +
+    (currentTemp > 24 ? 0.2 : 0);
   currentSoil = Math.max(0, Math.min(100, currentSoil - soilDrain));
 
   light = String(Math.round(currentLight));
@@ -39,6 +63,7 @@ function applyNaturalEnvironment() {
 
 // Automatyczna zmiana pory roku co days.value dni
 function nextSeason() {
+  if (customSeasonActive) return;
   const currentIndex = seasons.indexOf(season);
   if (currentIndex !== -1) {
     const nextIndex = (currentIndex + 1) % seasons.length;
@@ -132,7 +157,7 @@ function step(timeStep) {
         updateUI();
 
       const seasonLength = parseInt(days.value, 10) || 10;
-      if (seasonDay >= seasonLength) {
+      if (!customSeasonActive && seasonDay >= seasonLength) {
         nextSeason();
       }
     }

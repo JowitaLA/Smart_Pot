@@ -107,12 +107,14 @@
       </div>
     </div>
   </div>
-  <div class="row">
+  <!-- Parametry - testowanie (ukryte przez d-none) -->
+  <div class="row d-none">
     <p class="col text-center text-secondary mt-2 mb-0">Zdrowie: <span id="healthVal">0</span>%</p>
     <p class="col text-center text-secondary mt-2 mb-0">Światło: <span id="lightVal">0</span>%</p>
     <p class="col text-center text-secondary mt-2 mb-0">Temperatura: <span id="tempVal">0</span>°C</p>
     <p class="col text-center text-secondary mt-2 mb-0">Wilgotność: <span id="soilVal">0</span>%</p>
-  </div>
+  </div> 
+  
   <!-- Custom -->
   <div class="rounded p-4 mt-2">
     <div class="row">
@@ -198,20 +200,12 @@
             </div>
           </div>
 
-          <label class="w-100 text-secondary">Zakres wilgotności</label>
-          <div class="row mb-3">
-            <div class="col-6">
-              <div class="mb-2">
-                od <strong id="soilRangeMin">10</strong>%
-              </div>
-              <input type="range" id="customSoilMin" min="0" max="100" value="10" class="w-100" />
+          <label class="w-100 text-secondary">Prędkość pobierania wody</label>
+          <div class="mb-3">
+            <div class="mb-2">
+              <strong id="soilDrainVal">0.50</strong> / 2.00
             </div>
-            <div class="col-6">
-              <div class="mb-2">
-                do <strong id="soilRangeMax">80</strong>%
-              </div>
-              <input type="range" id="customSoilMax" min="0" max="100" value="80" class="w-100" />
-            </div>
+            <input type="range" id="customSoilDrain" min="0" max="2" step="0.01" value="0.50" class="w-100" />
           </div>
 
           <label class="w-100 text-secondary">Zakres światła</label>

@@ -10,6 +10,15 @@ let seasonDay = 0;  // dzień w aktualnej porze roku
 let season = "spring";  // aktualna pora roku
 let plant = "storczyk"; // aktualna roślina (domyślnie storczyk, można zmieniać na kaktus lub paprotkę)
 
+let customSeasonActive = false;
+let customSeasonConfig = {
+  tempMin: -10,
+  tempMax: 30,
+  lightMin: 10,
+  lightMax: 90,
+  soilDrain: 0.5,
+};
+
 let soil = 50;    // wilgotność gleby
 let light = 50;   // światło
 let temp = 20;    // temperatura
