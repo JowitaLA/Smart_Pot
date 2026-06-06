@@ -10,7 +10,7 @@ function updateUI() {
   document.getElementById("actuallytemp").innerText = temp;
   document.getElementById("healthVal").innerText = health;
 
-  document.getElementById("clockSeason").src = "../img/clock/" + season + ".png";
+  document.getElementById("clockSeason").src = "img/clock/" + season + ".png";
 
   document.getElementById("soilNewPlantVal").innerText = soilNewPlant.value;
   document.getElementById("lightNewPlantVal").innerText = lightNewPlant.value;
@@ -18,7 +18,7 @@ function updateUI() {
   document.getElementById("healthNewPlantVal").innerText = healthNewPlant.value;
 
   document.getElementById("plant").src =
-    "../img/pot/flowers/" +
+    "img/pot/flowers/" +
     (plant == "storczyk" ? "orchid" : plant == "kaktus" ? "cactus" : "fern") +
     "_" +
     (health > 50 ? "good" : health > 30 ? "ok" : "bad") +

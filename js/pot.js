@@ -24,29 +24,26 @@ function updatePotNotifications() {
   // TEMPERATURA
   const potCold = document.getElementById("potCold");
   const potHot = document.getElementById("potHot");
+  const optimalTempCenter = config.temp.sets[1][1];
+  const optimalLightCenter = config.light.sets[1][1];
+  const optimalSoilCenter = config.soil.sets[1][1];
+  const optimalMargin = 3; // margines od środka
+
+  // Zimno / Gorąco: mierzymy od idealnego środka temperatury
+  potCold.style.display = Number(temp) < optimalTempCenter - optimalMargin ? "block" : "none";
+  potHot.style.display = Number(temp) > optimalTempCenter + optimalMargin ? "block" : "none";
   
-  // Zimno = pierwszy zbiór (index 0)
-  potCold.style.display = tempMembership[0] > 0.3 ? "block" : "none";
-  // Gorąco = trzeci zbiór (index 2)
-  potHot.style.display = tempMembership[2] > 0.3 ? "block" : "none";
-  
-  // WILGOTNOŚĆ GLEBY
+  // WILGOTNOŚĆ GLEBY: mierzymy od idealnego środka wilgotności
   const potMist = document.getElementById("potMist");
   const potWater = document.getElementById("potWater");
+  potMist.style.display = Number(soil) < optimalSoilCenter - optimalMargin ? "block" : "none";
+  potWater.style.display = Number(soil) > optimalSoilCenter + optimalMargin ? "block" : "none";
   
-  // Za mało wody (Suche) = pierwszy zbiór (index 0)
-  potMist.style.display = soilMembership[0] > 0.3 ? "block" : "none";
-  // Za dużo wody (Mokre) = trzeci zbiór (index 2)
-  potWater.style.display = soilMembership[2] > 0.3 ? "block" : "none";
-  
-  // ŚWIATŁO
+  // ŚWIATŁO: mierzymy od idealnego środka światła
   const potShade = document.getElementById("potShade");
   const potSun = document.getElementById("potSun");
-  
-  // Za ciemno (Ciemne) = pierwszy zbiór (index 0)
-  potShade.style.display = lightMembership[0] > 0.3 ? "block" : "none";
-  // Za jasno (Jasne) = trzeci zbiór (index 2)
-  potSun.style.display = lightMembership[2] > 0.3 ? "block" : "none";
+  potShade.style.display = Number(light) < optimalLightCenter - optimalMargin ? "block" : "none";
+  potSun.style.display = Number(light) > optimalLightCenter + optimalMargin ? "block" : "none";
 }
 
 // POMOCNICZA FUNKCJA DO OBLICZENIA STOPNIA PRZYNALEŻNOŚCI

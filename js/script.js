@@ -147,23 +147,70 @@ const plantRateConfig = {
     soilDrain: 0.8,
     lightGain: 1.2,
     tempAdaptation: 0.14,
-    seasonalBases: { spring: 12, summer: 22, autumn: 12, winter: 1 },
-    seasonalAmplitudes: { spring: 8, summer: 10, autumn: 7, winter: 5 },
   },
   kaktus: {
     soilDrain: 0.4,
     lightGain: 1.6,
     tempAdaptation: 0.10,
-    seasonalBases: { spring: 14, summer: 24, autumn: 14, winter: 3 },
-    seasonalAmplitudes: { spring: 9, summer: 12, autumn: 8, winter: 6 },
   },
   paprotka: {
     soilDrain: 1.1,
     lightGain: 1.0,
     tempAdaptation: 0.16,
-    seasonalBases: { spring: 11, summer: 21, autumn: 11, winter: 0 },
-    seasonalAmplitudes: { spring: 7, summer: 9, autumn: 6, winter: 4 },
   },
+};
+
+const seasonTempRanges = {
+  winter: { min: -25, max: 5 },
+  spring: { min: 0, max: 22 },
+  summer: { min: 15, max: 40 },
+  autumn: { min: 5, max: 15 },
+};
+
+const seasonLightSchedule = {
+  winter: [
+    { from: 0, to: 7, value: 0 },
+    { from: 8, to: 8, value: 10 },
+    { from: 9, to: 11, value: 25 },
+    { from: 12, to: 12, value: 35 },
+    { from: 13, to: 15, value: 25 },
+    { from: 16, to: 16, value: 10 },
+    { from: 17, to: 23, value: 0 },
+  ],
+  spring: [
+    { from: 0, to: 5, value: 0 },
+    { from: 6, to: 7, value: 20 },
+    { from: 8, to: 11, value: 50 },
+    { from: 12, to: 13, value: 70 },
+    { from: 14, to: 17, value: 50 },
+    { from: 18, to: 19, value: 20 },
+    { from: 20, to: 23, value: 0 },
+  ],
+  summer: [
+    { from: 0, to: 4, value: 0 },
+    { from: 5, to: 5, value: 30 },
+    { from: 6, to: 9, value: 70 },
+    { from: 10, to: 14, value: 100 },
+    { from: 15, to: 19, value: 70 },
+    { from: 20, to: 21, value: 30 },
+    { from: 22, to: 23, value: 0 },
+  ],
+  autumn: [
+    { from: 0, to: 6, value: 0 },
+    { from: 7, to: 8, value: 15 },
+    { from: 9, to: 11, value: 40 },
+    { from: 12, to: 12, value: 50 },
+    { from: 13, to: 16, value: 40 },
+    { from: 17, to: 18, value: 15 },
+    { from: 19, to: 23, value: 0 },
+  ],
+};
+
+const seasonSoilDrain = {
+  winter: 0.1,
+  spring: 0.5,
+  summer: 1.5,
+  autumn: 0.25,
 };
 
 // FUNKCJE PRZYNALEŻNOŚCI

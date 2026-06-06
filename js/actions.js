@@ -192,12 +192,16 @@ function applyMoistureControl() {
     const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
     const optimalCenter = plantConfig.soil.sets[1][1];
     const margin = 1.5;
+    const lowTarget = optimalCenter - margin;
+    const highTarget = optimalCenter + margin;
 
-    if (currentSoil < optimalCenter - margin) {
+    while (currentSoil < lowTarget) {
       currentSoil = Math.min(100, currentSoil + 1);
-    } else if (currentSoil > optimalCenter + margin) {
+    }
+    while (currentSoil > highTarget) {
       currentSoil = Math.max(0, currentSoil - 1);
     }
+
     soil = String(Math.round(currentSoil));
   // Manualne podlewanie/pompowanie działa natychmiast gdy SMART wyłączony
   } else if (moistureControlMode === "watering") {
@@ -309,10 +313,10 @@ function applyLampControl() {
   // Jeśli smart jest ON, ma priorytet
   if (smartMode) {
     if (lampControlState.light) {
-      currentLight = Math.min(100, currentLight + 6);
+      currentLight = Math.min(100, currentLight + 26);
     }
     if (lampControlState.heat) {
-      currentTemp = Math.min(100, currentTemp + 1);
+      currentTemp = Math.min(100, currentTemp + 6);
     }
   // Jeśli smart jest OFF, używaj manual override
   } else if (lampControlMode.light || lampControlMode.heat) {

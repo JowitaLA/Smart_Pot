@@ -1,35 +1,52 @@
 // Parametry w doniczce
+function getSeasonLightPercent(seasonName, hour) {
+  const schedule = seasonLightSchedule[seasonName] || seasonLightSchedule.spring;
+  const entry = schedule.find((item) => hour >= item.from && hour <= item.to);
+  return entry ? entry.value : 0;
+}
+
+function randomSeasonTemperature(seasonName) {
+  const range = seasonTempRanges[seasonName] || seasonTempRanges.spring;
+  return range.min + Math.random() * (range.max - range.min);
+}
+
 function applyNaturalEnvironment() {
   const plantRates = plantRateConfig[plant] || plantRateConfig.storczyk;
   const dayFactor = triangle(time, 6, 12, 18);
-  const seasonLightFactor =
-    season === "summer"
-      ? 0.9
-      : season === "spring" || season === "autumn"
-      ? 0.75
-      : 0.45;
 
   let currentLight = Number(light);
   let currentTemp = Number(temp);
   let currentSoil = Number(soil);
 
-  const lightChange = dayFactor * seasonLightFactor * plantRates.lightGain * 2 -
-    (1 - dayFactor) * 1.4;
-  currentLight = Math.max(0, Math.min(100, currentLight + lightChange));
+  const scheduledLight = getSeasonLightPercent(season, time);
+  currentLight = Math.max(
+    0,
+    Math.min(100, scheduledLight + (Math.random() * 10 - 5)),
+  );
 
-  const ambientBase = plantRates.seasonalBases[season] ?? 12;
-  const ambientAmp = plantRates.seasonalAmplitudes[season] ?? 8;
-  const ambient = ambientBase + ambientAmp * dayFactor;
-  currentTemp += (ambient - currentTemp) * plantRates.tempAdaptation;
+  const targetTemp = randomSeasonTemperature(season);
+  currentTemp += (targetTemp - currentTemp) * plantRates.tempAdaptation;
   currentTemp = Number(currentTemp.toFixed(1));
 
   const soilDrain =
-    plantRates.soilDrain + dayFactor * 0.5 + (currentTemp > 24 ? 0.35 : 0);
+    seasonSoilDrain[season] + dayFactor * 0.1 + (currentTemp > 24 ? 0.2 : 0);
   currentSoil = Math.max(0, Math.min(100, currentSoil - soilDrain));
 
   light = String(Math.round(currentLight));
   temp = String(currentTemp);
   soil = String(Math.round(currentSoil));
+}
+
+// Automatyczna zmiana pory roku co days.value dni
+function nextSeason() {
+  const currentIndex = seasons.indexOf(season);
+  if (currentIndex !== -1) {
+    const nextIndex = (currentIndex + 1) % seasons.length;
+    season = seasons[nextIndex];
+    seasonDay = 0;
+    msg.innerText = "Nastała pora roku: " + season;
+    msgInfo.style.background = "var(--primary-color)";
+  }
 }
 
 function step(timeStep) {
@@ -39,9 +56,9 @@ function step(timeStep) {
     applyTempControl();
     if (typeof applyLampControl === 'function') applyLampControl();
 
-    let s = soil; // wilgotność gleby
-    let l = light; // światło
-    let t = temp; // temperatura
+    let s = soil;   // wilgotność gleby
+    let l = light;  // światło
+    let t = temp;   // temperatura
 
     // FUZZIFICATION
     let soilDry, soilOptimal, soilWet;
@@ -112,16 +129,19 @@ function step(timeStep) {
       totalDay += 1;
       seasonDay += 1;
 
+        updateUI();
+
       const seasonLength = parseInt(days.value, 10) || 10;
-      if (seasonDay > seasonLength) {
+      if (seasonDay >= seasonLength) {
         nextSeason();
       }
     }
+
     totalDay = Math.max(0, totalDay);
     totalDay = Math.min(totalDay, 999);
     updateHistory();
-    updateUI();
   }
+  updateUI();
   if (health <= 0) {
     alert("Roślina zwiędła");
   }
@@ -129,19 +149,6 @@ function step(timeStep) {
   if (health == 100) {
     //alert("Roślina jest w idealnym stanie");
   }
-}
-
-// Automatyczna zmiana pory roku co days.value dni
-function nextSeason() {
-  const currentIndex = seasons.indexOf(season);
-  if (currentIndex !== -1) {
-    const nextIndex = (currentIndex + 1) % seasons.length;
-    season = seasons[nextIndex];
-    seasonDay = 0;
-    msg.innerText = "Nastała pora roku: " + season;
-    msgInfo.style.background = "var(--primary-color)";
-  }
-  updateUI();
 }
 
 window.nextSeason = nextSeason;

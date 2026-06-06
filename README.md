@@ -16,34 +16,24 @@ Tryb SMART (uzupełnianie wody i włączanie sztucznej lampy/zasywanie i odsuwan
 # Parametry
 - [x] Wykres wilgotności gleby
 - [x] Przycisk - podlej/oszusz
-- [ ] Tryb SMART - pobieranie wody ze zbiornika/odpompowywanie
+- [x] Tryb SMART - pobieranie wody ze zbiornika/odpompowywanie
 
 - [x] Wykres światła gleby
 - [x] Przycisk - zasłonięcie/odsłonięcie rolety 
-- [ ] Przycisk - zaświecenie/zgaszenie sztucznej lampy (jak noc/zła pogoda)
-- [ ] Tryb SMART - sterowanie roletą i lampą
+- [x] Przycisk - zaświecenie/zgaszenie sztucznej lampy (jak noc/zła pogoda)
+- [x] Tryb SMART - sterowanie roletą i lampą
 
-- [ ] Wykres temperatury
-- [ ] Przycisk - włączenie/wyłączenie trybu ogrzewania rośliny lampą
-- [ ] Termometr sprawdzający ile jest stopni na dworze (-25 do 40 stopni)
-- [ ] Przycisk - włączenie/wyłączenie wentylatora z dwoma trybami: zwykły (gdy małe obniżenie) bądź z zamgławiaczem (gdy dużo)
-- [ ] tryb SMART - sterowanie wentylatorem i jego dwoma trybami
+- [x] Wykres temperatury
+- [x] Przycisk - włączenie/wyłączenie trybu ogrzewania rośliny lampą
+- [x] Termometr sprawdzający ile jest stopni na dworze (-25 do 40 stopni)
+- [x] Przycisk - włączenie/wyłączenie wentylatora z dwoma trybami: zwykły (gdy małe obniżenie) bądź z zamgławiaczem (gdy dużo)
+- [x] tryb SMART - sterowanie wentylatorem i jego dwoma trybami
 
-- [ ] podlewanie: schładzanie temperatury
-- [ ] sztuczna lampa: nagrzewanie temperatury
-- [ ] noc: chłodniej
-- [ ] dzień: cieplej
+- [x] sztuczna lampa: nagrzewanie temperatury
+- [x] noc: chłodniej
+- [x] dzień: cieplej
 
-- [ ] Tryb SMART
-- [ ] Światło i temperatura:
-    - IF ciemno i gorąco TO lampa wyłączona i roleta odsłonięta
-    - IF ciemno i zimno TO lampa włączona
-- [ ] Ochrona przed przegniciem: 
-    - IF mokro i zimno TO odpompowywanie wody i wiatrak tryb zwykły
-    - IF sucho i gorąco TO podlewanie i wiatrak tryb zamgławiacz
-- [ ] Słońce jako grzejnik:
-    - IF jasno i gorąco TO roleta zasłonięta
-    - IF jasno i zimno TO roleta odsłonięta
+- [x] Tryb SMART
     
 ---
 - [ ]  Pory roku:
