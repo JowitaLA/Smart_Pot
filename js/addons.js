@@ -45,6 +45,13 @@ document.addEventListener(
   { once: true },
 );
 
+// modal aktywny na początku
+window.addEventListener('load', function () {
+    const myModal = new bootstrap.Modal(document.getElementById('helpModal'));
+    myModal.show();
+  });
+
+
 // PRZYCISKI PONIŻEJ SYMULACJI - aktualizowanie etykiet pod suwakami
 if (soilNewPlant) {
   soilNewPlant.addEventListener("input", () => {
