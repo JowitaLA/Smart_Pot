@@ -13,12 +13,499 @@
 
 <body class="content-background">
 
+  <!-- Pomoc -->
+
+  <button class="custom-button position-fixed" style="top: 10px; left: 10px; z-index: 100;" data-bs-toggle="modal"
+    data-bs-target="#helpModal">
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16">
+
+      <path
+        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247m2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z" />
+    </svg>
+
+  </button>
+
+  <!-- Muzyka -->
+
+  <button id="musicToggle" class="custom-button position-fixed" style="top: 10px; right: 10px; z-index: 100;">
+
+    <svg id="musicIcon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor"
+      viewBox="0 0 16 16">
+
+      <!-- START = pauza -->
+      <path id="iconPath"
+        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.25 5C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5m3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5" />
+    </svg>
+
+  </button>
+
+  <audio id="bgMusic" loop>
+    <source src="music/music.mp3" type="audio/mpeg">
+  </audio>
+
+
   <header class="header-background text-center">
     <h3 class="text-dark">Inteligentna Doniczka</h3>
     <p class="lead text-secondary">
       <b>Symulator inteligentnej doniczki opierający się na zbiorach rozmytych.</b>
     </p>
   </header>
+
+  <!-- Modal -->
+  <div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+      <div class="modal-content" style="background: rgba(var(--card));">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Witaj w Symulatorze Inteligentnej Doniczki</h5>
+        </div>
+
+        <div class="modal-body">
+
+          <p>
+            Dbaj o swoją wirtualną roślinę, reagując na zmieniające się warunki środowiskowe.
+            Każda tura oznacza upływ czasu, a Twoje decyzje wpływają na stan rośliny.
+          </p>
+
+          <p class="text-muted">
+            W trybie manualnym samodzielnie sterujesz urządzeniami, natomiast tryb SMART
+            automatycznie dostosowuje parametry na podstawie bieżących warunków.
+          </p>
+
+          <hr>
+
+          <!-- ZEGAR -->
+          <h6 class="fw-bold">🕒 Zegar </h6>
+          <p class="text-muted">
+            Pokazuje aktualną temperaturę, godzinę, porę roku oraz dzień.<br>
+            · Jedna godzina odpowiada jednej turze w symulatorze.<br>
+            · Po jej zakończeniu parametry rośliny są aktualizowane, a ich historię można śledzić na wykresie po prawej
+            stronie.<br>
+            · W ciągu dnia roślina otrzymuje więcej światła niż w nocy.<br>
+            · Temperatura, pobieranie wody przez roślinę oraz ilość światła zmienia się w zależności od aktualnej pory
+            roku.
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: linear-gradient(135deg, #829b01, #718274);"></span>
+            Następna godzina
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: linear-gradient(135deg, #b39a1e, #ac9e8f);"></span>
+            Następny dzień
+          </p>
+
+
+          <p class="text-center">
+            Każda pora roku to nowe wyzwania, jakim trzeba sprostać.
+          </p>
+
+          <div class="row text-center">
+            <div class="col ml-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img src="img/clock/spring.png" style="height: 50px"><br>
+              <p class="text-muted">Wiosna</p>
+            </div>
+
+            <div class="col ml-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img src="img/clock/summer.png" style="height: 50px"><br>
+              <p class="text-muted">Lato</p>
+            </div>
+
+            <div class="col ml-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img src="img/clock/autumn.png" style="height: 50px"><br>
+              <p class="text-muted">Jesień</p>
+            </div>
+
+            <div class="col ml-2 mr-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img src="img/clock/winter.png" style="height: 50px"><br>
+              <p class="text-muted">Zima</p>
+            </div>
+          </div>
+
+          <p class="text-custom text-center mt-4">
+            Jeśli chcesz pełnej kontroli, możesz ustawić własne parametry i rozpocząć symulację od niestandardowej pory
+            roku.
+          </p>
+
+          <div class="text-center">
+            <div
+              style="display: inline-block; background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25); padding: 5px;">
+              <img src="img/clock/custom.png" style="height: 50px">
+              <br>
+              <p class="text-muted"> Wybranie własnego trybu oznaczane jest tą ikoną na zegarze </p>
+            </div>
+          </div>
+
+          <p class="small text-muted mt-4">
+            📅 Dostosuj tempo zmiany pór roku, wybierając liczbę dni a następnie początkową porę roku w sekcji poniżej
+            symulatora.
+            <br>
+            🕗 Zaleca się korzystanie z przejścia do następnego dnia tylko przy włączonym trybie SMART.
+          </p>
+
+          <hr>
+
+          <!-- LAMPA -->
+          <h6 class="fw-bold">💡 Lampa</h6>
+          <p class="text-muted">
+            Odpowiada za oświetlenie i temperaturę.<br>
+            · Szczególnie jest ważna w nocy i zimą.<br>
+            · Tryb SMART potrafi automatycznie dostosować natężenie światła i ogrzewania.<br>
+            · Przy włączeniu jednego z trybów towarzyszy animacja świecącej diody oraz lampy.
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: rgba(255,200,1,0.9);"></span>
+            Oświetlenie <i>(ok. +36% światła)</i>
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: rgba(195,24,12,0.9);"></span>
+            Ogrzewanie <i>(ok. +15°C temperatury)</i>
+          </p>
+
+          <p class="small text-muted mt-4">
+            💡 Oświetlanie i ogrzewanie działają ciągle w turze (tryb aktywny).
+          </p>
+
+          <hr>
+
+          <!-- WIATRAK -->
+          <h6 class="fw-bold">🌀 Wiatrak</h6>
+          <p class="text-muted">
+            Steruje wilgotnością oraz temperaturą.<br>
+            · Pozwala odpompować nadmiar wody bądź nawodnić roślinę.<br>
+            · Również jest odpowiedzialny za temperaturę, przez wbudowany wiatrak z zraszaczem.<br>
+            · Przy włączeniu jednego z trybów towarzyszy animacja świecącej diody oraz wiatraka.
+            · Tryb SMART potrafi automatycznie dostosować natężenie zraszania oraz wentylacji.
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: rgba(25,192,175,0.9);"></span>
+            Nawadnianie <i>(ok. +4% wilgotności)</i>
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: rgba(210,129,16,0.9);"></span>
+            Osuszanie <i>(ok. -4% wilgotności)</i>
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: rgba(185,186,187,0.9);"></span>
+            Wentylacja <i>(ok. -2,6°C temperatury i -1,2% wilgotności)</i>
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: rgba(136,210,234,0.9);"></span>
+            Zraszanie <i>(ok. -0,9°C temperatury i +3% wilgotności)</i>
+          </p>
+
+          <p class="small text-muted mt-4">
+            💧 Nawadnianie i osuszanie można użyć kilka razy na turę.<br>
+            💨 Wentylacja i zraszanie działają ciągle w turze (tryb aktywny).
+          </p>
+
+          <hr>
+
+          <!-- ROLETA -->
+          <h6 class="fw-bold">🪟 Roleta</h6>
+          <p class="text-muted">
+            Ogranicza ilość światła zewnętrznego.<br>
+            · Ważna przy wysokim nasłonecznieniu.
+            · Przy zwinięciu rolety towarzyszy lekkie przyciemnienie aktualnej pory dnia.
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: linear-gradient(135deg,#151515,#323232);"></span>
+            Sterowanie roletą <i>(ok. 50-80% w zależności od warunków)</i>
+          </p>
+
+          <p class="small text-muted mt-4">
+            🕶️ Roleta działa ciągle w turze (tryb aktywny).<br>
+          </p>
+
+          <hr>
+
+          <!-- DONICZKA -->
+          <h6 class="fw-bold">🪴 Doniczka</h6>
+          <p class="text-muted">
+            Pokazuje ogólny stan rośliny i pozwala na włączenie trybu SMART.
+            · Tryb SMART steruje każdym urządzeniem, nielicząc zegara.
+            · O aktywacji trybu informuje błękitna dioda pod przyciskiem.
+          </p>
+
+          <p>
+            <span class="helpBtn" style="background: #717171;"></span>
+            Aktywowanie trybu SMART
+          </p>
+          <p class="text-center">
+            Doniczka ma wbudowane czujniki, które informują o niekorzystnych warunkach dla rośliny.
+          </p>
+          <div class="row text-center">
+            <div class="col ml-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img class="mt-3" src="img/pot/notification/sunInfo.png" style="height: 50px"><br>
+              <p class="text-muted mt-1">Za jasno</p>
+            </div>
+
+            <div class="col ml-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img class="mt-3" src="img/pot/notification/shadeInfo.png" style="height: 50px"><br>
+              <p class="text-muted mt-1">Za ciemno</p>
+            </div>
+
+            <div class="col ml-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img class="mt-3" src="img/pot/notification/waterInfo.png" style="height: 50px"><br>
+              <p class="text-muted mt-1">Za dużo wody</p>
+            </div>
+
+            <div class="col ml-2 mr-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img class="mt-3" src="img/pot/notification/mistInfo.png" style="height: 50px"><br>
+              <p class="text-muted mt-1">Za mało wody</p>
+            </div>
+
+            <div class="col ml-2 mr-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img class="mt-3" src="img/pot/notification/coldInfo.png" style="height: 50px"><br>
+              <p class="text-muted mt-1">Za zimno</p>
+            </div>
+
+            <div class="col ml-2 mr-2"
+              style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+              <img class="mt-3" src="img/pot/notification/hotInfo.png" style="height: 50px"><br>
+              <p class="text-muted mt-1">Za ciepło</p>
+            </div>
+          </div>
+
+          <p class="text-custom text-center mt-2">
+            Aktualny stan rośliny <i>(zdrowie)</i> jest wyświetlany przez cały czas.
+          </p>
+          <div class="row text-center">
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/pot/happyInfo.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Dobry stan</p>
+              </div>
+            </div>
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/pot/sadInfo.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Pogorszony stan</p>
+              </div>
+            </div>
+            <div class="col ml-4 mr-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/pot/deadInfo.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Roślina zwiędła</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="small text-muted mt-4">
+            🧠 Tryb SMART aktywowany zostaje odrazu.
+            <br>
+            <b>⚠️ Uwaga: po włączeniu SMART, tryb manualny zostaje tymczasowo wyłączony.</b>
+          </p>
+
+          <hr>
+
+          <!-- MECHANIKA -->
+          <h6 class="fw-bold">⚙️ Mechanika symulacji</h6>
+          <p class="text-muted">
+            · Parametry są aktualizowane co turę (godzina w symulatorze).<br>
+            · Urządzenia mają różną "siłę działania".<br>
+            · Warunki zmieniają się zależnie od pory dnia i roku.<br>
+            · System SMART wykorzystuje logikę rozmytą do podejmowania decyzji.
+          </p>
+
+          <hr>
+
+          <h6 class="fw-bold">📊 Wykresy rozmyte (fuzzy)</h6>
+
+          <p class="text-muted">
+            · Pokazują, stany jakie wybrana roślina może mieć.<br>
+            · Wykorzystują logikę rozmytą do oceny warunków środowiskowych.<br>
+            · Aktualna wartość oznaczona jest wskaźnikiem na osi.<br>
+            · System wyznacza dominujący stan i jego stopień przynależności.
+          </p>
+
+          <p class="small text-muted">
+            ⚖️ Wykresy pozwalają sprawdzić, jak system ocenia aktualne warunki rośliny i na jakiej podstawie decyduje o
+            ich stanie.
+          </p>
+
+          <h6 class="fw-bold">📈 Historia</h6>
+
+          <p class="text-muted">
+            · Pokazuje historię parametrów rośliny z ostatnich 24 godzin (tur).<br>
+            · Aktualizuje się automatycznie po każdej turze.<br>
+            · Uwzględnia: zdrowie rośliny, wilgotność gleby, światło oraz temperaturę.<br>
+            · Daje możliwośc analizowania wpływu różnych decyzji na stan rośliny.
+          </p>
+
+          <p class="small text-muted">
+            💡 Wykres przedstawia dane w czasie, gdzie każda godzina to jeden punkt pomiarowy.<br>
+            ⚠️ Historia obejmuje tylko ostatnie 24 godziny. Starsze dane są usuwane.
+          </p>
+
+          <hr>
+
+          <h6 class="fw-bold">🌱 Wybór rośliny</h6>
+
+          <p class="text-muted">
+            W każdym momencie można zmienić roślinę w sekcji poniżej symulatora.
+            · Można dostosować jej poczatkowe zdrowie, wilgotność gleby, światło oraz temperaturę.<br>
+            · Wybór jest ograniczony do trzech rościn: paproci, storczyka oraz kaktusa.<br>
+            · Każda z roślin posiada inne wymagania.<br>
+            · Wygląd rośliny zależy od jej stanu i zdrowia.<br>
+            · Zmiana rośliny nie resetuje czasu oraz historii.
+          </p>
+
+          <p class="small text-muted">
+            🌹 Zaleca się wybrać roślinę po rozpoczęciu nowej gry, ponieważ zmiana pory roku automatycznie zaczyna
+            symulacje od nowa. <br>
+            🎓 Możliwość zmiany rośliny w trakcie działania symulacji pozwala porównać, jak różne gatunki reagują na te
+            same warunki.
+          </p>
+
+          <h7 class="fw-bold mt-2">🌺 Parametry storczyka</h7>
+
+          <p class="text-muted">
+            Storczyk to roślina wymagająca zrównoważonych warunków.<br>
+            💧 Wilgotność gleby: optymalna 50-70%<br>
+            💡 Światło: umiarkowane (ok. 50%)<br>
+            🌡️ Temperatura: optymalna 21-27°C<br>
+          </p>
+          <div class="row text-center">
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/orchid_good.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Dobry stan storczyka</p>
+              </div>
+            </div>
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/orchid_ok.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Średni stan storczyka</p>
+              </div>
+            </div>
+            <div class="col ml-4 mr-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/orchid_bad.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Zły stan storczyka</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="small text-muted mt-4">
+            ⚙️ Szybkość wysychania gleby: średnia<br>
+            ⚙️ Adaptacja temperatury: umiarkowana
+          </p>
+
+          <h7 class="fw-bold mt-2">🌿 Parametry paproci</h7>
+          <p class="text-muted">
+            Paproć preferuje wilgotne i stabilne środowisko.<br>
+            💧 Wilgotność gleby: wysoka (65-80%)<br>
+            💡 Światło: niskie do umiarkowanego (30-50%)<br>
+            🌡️ Temperatura: optymalna 22-27°C<br>
+          </p>
+          <div class="row text-center">
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/fern_good.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Dobry stan paproci</p>
+              </div>
+            </div>
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/fern_ok.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Średni stan paproci</p>
+              </div>
+            </div>
+            <div class="col ml-4 mr-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/fern_bad.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Zły stan paproci</p>
+              </div>
+            </div>
+          </div>
+          <p class="small text-muted mt-4">
+            ⚙️ Szybkość wysychania gleby: wysoka<br>
+            ⚙️ Adaptacja temperatury: szybka
+          </p>
+
+
+          <h7 class="fw-bold mt-2">🌵 Parametry kaktusa</h7>
+          <p class="text-muted">
+            Kaktus jest odporną rośliną preferującą suche i ciepłe warunki.<br>
+            💧 Wilgotność gleby: niska (12-38%)<br>
+            💡 Światło: wysokie (70-90%)<br>
+            🌡️ Temperatura: optymalna 28-35°C<br>
+          </p>
+          <div class="row text-center">
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/cactus_good.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Dobry stan kaktusa</p>
+              </div>
+            </div>
+            <div class="col ml-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/cactus_ok.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Średni stan kaktusa</p>
+              </div>
+            </div>
+            <div class="col ml-4 mr-4">
+              <div class="pt-2 pb-2"
+                style="background: rgba(var(--custom), 0.6); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);">
+                <img class="mt-2" src="img/pot/flowers/cactus_bad.png" style="height: 50px"><br>
+                <p class="text-muted mt-3">Zły stan kaktusa</p>
+              </div>
+            </div>
+          </div>
+          <p class="small text-muted mt-4">
+            ⚙️ Szybkość wysychania gleby: niska<br>
+            ⚙️ Adaptacja temperatury: wolna
+          </p>
+
+          <hr>
+
+          <h4 class="text-center"> 🎊 Koniec 🎊 </h4>
+          <p class="text-center">
+            Dziękuję za przeczytanie poradnika.<br>
+            Życzę miłej zabawy i powodzenia w opiece nad rośliną!
+          </p>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">
+            Zamknij
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <div class="rounded shadow p-4">
     <div class="row">
       <div class="col d-flex flex-column mr-2 bg-card align-items-center">
@@ -98,11 +585,15 @@
 
       <div class="col-md-3 d-flex flex-column bg-card align-items-center">
         <h4 class="mb-2 text-dark">Wykresy</h4>
-        <canvas id="fuzzySoil" width="300" height="150"></canvas>
+        <div id="fuzzySoil" class="fuzzy-chart"></div>
+        <div id="fuzzyLight" class="fuzzy-chart"></div>
+        <div id="fuzzyTemp" class="fuzzy-chart"></div>
+
+        <!-- <canvas id="fuzzySoil" width="300" height="150"></canvas>
         <canvas id="fuzzyLight" width="300" height="150"></canvas>
-        <canvas id="fuzzyTemp" width="300" height="150"></canvas>
+        <canvas id="fuzzyTemp" width="300" height="150"></canvas> -->
         <div class="text-center">
-          <canvas id="historyChart" width="300" height="150"></canvas>
+          <canvas id="historyChart"></canvas>
         </div>
       </div>
     </div>
@@ -113,8 +604,8 @@
     <p class="col text-center text-secondary mt-2 mb-0">Światło: <span id="lightVal">0</span>%</p>
     <p class="col text-center text-secondary mt-2 mb-0">Temperatura: <span id="tempVal">0</span>°C</p>
     <p class="col text-center text-secondary mt-2 mb-0">Wilgotność: <span id="soilVal">0</span>%</p>
-  </div> 
-  
+  </div>
+
   <!-- Custom -->
   <div class="rounded p-4 mt-2">
     <div class="row">
@@ -226,9 +717,6 @@
         </div>
       </div>
     </div>
-
-
-
   </div>
   <footer class="text-center footer-background mt-2">
     <div class="row">
@@ -255,29 +743,10 @@
     </div>
   </footer>
 
+  <script type="module" src="js/fuzzy-bridge.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- 1. Stan gry i podstawowe zmienne -->
-  <script src="js/script.js"></script>
-
-  <!-- 2. Zmiana pory roku lub rośliny -->
-  <script src="js/addons.js"></script>
-
-  <!-- 3. Pobranie użytych przez użytkownika akcji -->
-  <script src="js/actions.js"></script>
-
-  <!-- 4. Zarządzanie rzeczami w czasie -->
-  <script src="js/time.js"></script>
-
-  <!-- 5. Zachowanie rośliny oraz parametrów ze względu na czas i akcje -->
-  <script src="js/pot.js"></script>
-  
-  <!-- 6. Malowanie wykresów -->
-  <script src="js/chart.js"></script>
-
-  <!-- 7. Aktualizacja danych -->
-  <script src="js/update.js"></script>
-
+  <script src="js/bootstrap.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

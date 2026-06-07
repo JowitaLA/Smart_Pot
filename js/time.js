@@ -1,8 +1,19 @@
-// Parametry w doniczce
+//Plik time.js odpowiedzialny jest za przejście do następnej tury oraz zarządzanie:
+// mocą światła, porą dnia, temperaturą, wilgotnością, aktualną porą roku, komunikatami stanu rośliny.
+
+// Sterowanie mocą światła dla danej pory roku
+function getSeasonLightPercent(seasonName, hour) {
+  const schedule = seasonLightSchedule[seasonName] || seasonLightSchedule.spring;
+  const entry = schedule.find((item) => hour >= item.from && hour <= item.to);
+  return entry ? entry.value : 0;
+}
+
+// Sterowanie mocą światła dla custom pory roku
 function getCustomLightPercent(hour) {
   const minLight = Math.min(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
   const maxLight = Math.max(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
 
+  // Sterowanie mocy światła ze wzgledu na godzinę
   if (hour >= 0 && hour <= 4) return 0;
   if (hour >= 5 && hour <= 7) return minLight * 0.6;
   if (hour >= 8 && hour <= 11) return (minLight + maxLight) / 2;
@@ -11,23 +22,20 @@ function getCustomLightPercent(hour) {
   return 0;
 }
 
-function getSeasonLightPercent(seasonName, hour) {
-  const schedule = seasonLightSchedule[seasonName] || seasonLightSchedule.spring;
-  const entry = schedule.find((item) => hour >= item.from && hour <= item.to);
-  return entry ? entry.value : 0;
+// Losowanie temperatury dla danej pory roku
+function randomSeasonTemperature(seasonName) {
+  const range = seasonTempRanges[seasonName] || seasonTempRanges.spring;
+  return range.min + Math.random() * (range.max - range.min);
 }
 
+// Losowanie temperatury dla custom pory roku
 function randomCustomTemperature() {
   const minTemp = Math.min(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
   const maxTemp = Math.max(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
   return minTemp + Math.random() * (maxTemp - minTemp);
 }
 
-function randomSeasonTemperature(seasonName) {
-  const range = seasonTempRanges[seasonName] || seasonTempRanges.spring;
-  return range.min + Math.random() * (range.max - range.min);
-}
-
+// ZMIANA
 function applyNaturalEnvironment() {
   const plantRates = plantRateConfig[plant] || plantRateConfig.storczyk;
   const dayFactor = triangle(time, 6, 12, 18);
@@ -36,111 +44,139 @@ function applyNaturalEnvironment() {
   let currentTemp = Number(temp);
   let currentSoil = Number(soil);
 
+  // Światło zależy od aktualnej pory roku:
+  // - jeśli aktywna jest custom pora roku, używany jest zakres użytkownika
+  // - w przeciwnym wypadku wybrany zostaje standardowy harmonogram
   const scheduledLight = customSeasonActive
     ? getCustomLightPercent(time)
     : getSeasonLightPercent(season, time);
-  currentLight = Math.max(
-    0,
-    Math.min(100, scheduledLight + (Math.random() * 10 - 5)),
-  );
 
+  // Dodajemy mały losowy szum, aby środowisko nie było całkowicie sztywne
+  currentLight = clamp(scheduledLight + (Math.random() * 10 - 5), 0, 100);
+
+  // Temperatura dąży do docelowego zakresu temperatury pory roku / własnej pory roku
   const targetTemp = customSeasonActive
     ? randomCustomTemperature()
     : randomSeasonTemperature(season);
+
+  // Stopień adaptacji zależy od typu rośliny
   currentTemp += (targetTemp - currentTemp) * plantRates.tempAdaptation;
   currentTemp = Number(currentTemp.toFixed(1));
 
+  // Ubytek wilgotności gleby:
+  // - zależy od poru roku lub custom pory roku,
+  // - jest większy w dzień,
+  // - rośnie przy wyższej temperaturze,
+  // - oraz jest skalowany parametrem rośliny
+  const baseDrain = customSeasonActive
+    ? customSeasonConfig.soilDrain
+    : seasonSoilDrain[season];
+
   const soilDrain =
-    (customSeasonActive ? customSeasonConfig.soilDrain : seasonSoilDrain[season]) +
-    dayFactor * 0.1 +
-    (currentTemp > 24 ? 0.2 : 0);
-  currentSoil = Math.max(0, Math.min(100, currentSoil - soilDrain));
+    baseDrain * plantRates.soilDrain +
+    dayFactor * 0.2 +
+    (currentTemp > 24 ? 0.25 : 0);
+
+  currentSoil = clamp(currentSoil - soilDrain, 0, 100);
 
   light = String(Math.round(currentLight));
   temp = String(currentTemp);
   soil = String(Math.round(currentSoil));
 }
 
-// Automatyczna zmiana pory roku co days.value dni
+// Automatyczna zmiana pory roku co `days.value` dni
 function nextSeason() {
+  // nie zmienia pory roku dla gry własnej
   if (customSeasonActive) return;
+
   const currentIndex = seasons.indexOf(season);
   if (currentIndex !== -1) {
     const nextIndex = (currentIndex + 1) % seasons.length;
     season = seasons[nextIndex];
     seasonDay = 0;
-    msg.innerText = "Nastała pora roku: " + season;
-    msgInfo.style.background = "var(--primary-color)";
+
+    msgSeason.innerText = "Nastała pora roku: " + season;
+    msgSeason.style.background = "var(--primary-color)";
   }
 }
 
+// 
 function step(timeStep) {
   for (let i = 0; i < timeStep; i++) {
+    // Najpierw działa środowisko naturalne
     applyNaturalEnvironment();
+
+    // Potem działają urządzenia
     applyMoistureControl();
     applyTempControl();
-    if (typeof applyLampControl === 'function') applyLampControl();
+    if (typeof applyLampControl === "function") applyLampControl();
 
-    let s = soil;   // wilgotność gleby
-    let l = light;  // światło
-    let t = temp;   // temperatura
+    // Aktualne wartości
+    const s = Number(soil);
+    const l = Number(light);
+    const t = Number(temp);
 
     // FUZZIFICATION
-    let soilDry, soilOptimal, soilWet;
-    let tempCold, tempOptimal, tempHot;
-    let lightDark, lightOptimal, lightBright;
+    // Membershipy pobieramy przez helper z script.js
+    const [soilDry, soilOptimal, soilWet] = getMemberships("soil", s);
+    const [tempCold, tempOptimal, tempHot] = getMemberships("temp", t);
+    const [lightDark, lightOptimal, lightBright] = getMemberships("light", l);
 
-    const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-    const soilSets = plantConfig.soil.sets;
-    const tempSets = plantConfig.temp.sets;
-    const lightSets = plantConfig.light.sets;
+    // Rozmyty podział na dzień i noc
+    const day = triangle(time, 6, 12, 18);
+    const night = 1 - day;
 
-    soilDry = triangle(s, ...soilSets[0]);
-    soilOptimal = triangle(s, ...soilSets[1]);
-    soilWet = triangle(s, ...soilSets[2]);
+    // REGUŁY STRESU
+    const ruleSoilDry = soilDry;
+    const ruleSoilWet = soilWet;
+    const ruleTempCold = tempCold;
+    const ruleTempHot = tempHot;
+    const ruleDarkInDay = Math.min(lightDark, day);
+    const ruleBrightAtNight = Math.min(lightBright, night);
 
-    tempCold = triangle(t, ...tempSets[0]);
-    tempOptimal = triangle(t, ...tempSets[1]);
-    tempHot = triangle(t, ...tempSets[2]);
+    const bad = Math.max(
+      ruleSoilDry,
+      ruleSoilWet,
+      ruleTempCold,
+      ruleTempHot,
+      ruleDarkInDay,
+      ruleBrightAtNight
+    );
 
-    lightDark = triangle(l, ...lightSets[0]);
-    lightOptimal = triangle(l, ...lightSets[1]);
-    lightBright = triangle(l, ...lightSets[2]);
+    
+    // REGUŁY DOBROSTANU
+    
+    // Dobre warunki w dzień:
+    // - gleba optymalna
+    // - temperatura optymalna
+    // - światło optymalne
+    const goodDay = Math.min(soilOptimal, tempOptimal, lightOptimal, day);
 
-    let day = triangle(time, 6, 12, 18);
-    let night = 1 - day;
+    // Dobre warunki w nocy:
+    // - gleba optymalna
+    // - temperatura optymalna
+    const goodNight = Math.min(soilOptimal, tempOptimal, night);
 
-    // REGUŁY DLA DONICZKI
+    const good = Math.max(goodDay, goodNight);
 
-    // Źle jeśli jest za sucho
-    let rule1 = Math.min(soilDry);
-    // Źle jeśli jest za mokro
-    let rule2 = Math.min(soilWet);
+    
+    // DECYZJA / UPROSZCZONA DEFUZYFIKACJA
 
-    // Źle jeśli jest za gorąco
-    let rule3 = Math.min(tempHot);
-    // Źle jeśli jest za zimno
-    let rule4 = Math.min(tempCold);
+    // Złe warunki obniżają zdrowie mocniej,
+    // dobre warunki poprawiają zdrowie słabiej, ale regularnie
+    const change = good * 4.5 - bad * 8 + 0.4;
 
-    // Źle jeśli jest ciemno w dzień
-    let rule5 = Math.min(lightDark, day);
-    // Źle jeśli jest jasno w noc
-    let rule6 = Math.min(lightBright, night);
+    health = Number(clamp(health + change, 0, 100).toFixed(1));
 
-    // AGREGACJA
-    let bad = Math.max(rule1, rule2, rule3, rule4, rule5, rule6);
+    
+    // KOMUNIKAT STANU
+    
+    const balance = good - bad;
 
-    // DECYZJA
-    let change = -bad * 10 + 1; // kara + regeneracja
-
-    health += change;
-    health = Math.max(0, Math.min(100, health));
-
-    // KOMUNIKAT
-    if (bad > 0.6) {
+    if (balance < -0.35) {
       msgState.innerText = "Warunki złe!";
       msgState.style.background = "#d9534f";
-    } else if (bad > 0.3) {
+    } else if (balance < 0.05) {
       msgState.innerText = "Roślina w stresie";
       msgState.style.background = "#f0ad4e";
     } else {
@@ -148,31 +184,33 @@ function step(timeStep) {
       msgState.style.background = "#5c832a";
     }
 
+    
     // CZAS
+    
     time = (time + 1) % 24;
+
     if (time === 0) {
       totalDay += 1;
       seasonDay += 1;
 
-        updateUI();
+      updateUI();
 
       const seasonLength = parseInt(days.value, 10) || 10;
+
+      // Przy custom season nie przechodzimy automatycznie dalej
       if (!customSeasonActive && seasonDay >= seasonLength) {
         nextSeason();
       }
     }
 
-    totalDay = Math.max(0, totalDay);
-    totalDay = Math.min(totalDay, 999);
+    totalDay = clamp(totalDay, 0, 999);
     updateHistory();
   }
+
   updateUI();
+
   if (health <= 0) {
     alert("Roślina zwiędła");
-  }
-
-  if (health == 100) {
-    //alert("Roślina jest w idealnym stanie");
   }
 }
 

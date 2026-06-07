@@ -1,3 +1,5 @@
+// Plik chart.js odpowiedzialny jest za wykresy i ich aktualizacje.
+
 // HISTORIA
 const history = {
   time: [],
@@ -6,15 +8,17 @@ const history = {
   light: [],
   temp: [],
 };
-const maxHistory = 24; // ostatnie 24 godziny
-const historyChart = document.getElementById("historyChart"); // id canvas dla wykresu historii
-let historyChartInstance = null; // instancja Chart.js dla historii
 
-// Fuzzy canvases
+const maxHistory = 24; // ostatnie 24 godziny
+const historyChart = document.getElementById("historyChart");
+let historyChartInstance = null;
+
+// Fuzzy containers
 const fuzzySoil = document.getElementById("fuzzySoil");
 const fuzzyLight = document.getElementById("fuzzyLight");
 const fuzzyTemp = document.getElementById("fuzzyTemp");
 
+// HISTORIA PARAMETRÓW
 function updateHistory() {
   if (history.time.length >= maxHistory) {
     history.time.shift();
@@ -42,215 +46,178 @@ function resetHistory() {
   updateHistory();
 }
 
-function getFuzzyParams(variable) {
-  const config = plantFuzzyConfig[plant]?.[variable];
+// FUZZY SVG HELPERS
+function getCurrentVariableValue(variable) {
+  if (variable === "soil") return Number(soil);
+  if (variable === "light") return Number(light);
+  if (variable === "temp") return Number(temp);
+  return 0;
+}
+
+function getVariableTitle(variable) {
+  if (variable === "soil") return "💧 Wilgotność 💧";
+  if (variable === "light") return "☀️ Światło ☀️";
+  if (variable === "temp") return "🌡️ Temperatura 🌡️";
+  return variable;
+}
+
+function formatMembershipSummary(variable, value) {
+  const config = getPlantConfig()[variable];
+  if (!config) return "";
+
+  const membershipMap = getMembershipMap(variable, value);
+
+  return config.labels
+    .map((label) => `${label}: ${(membershipMap[label] ?? 0).toFixed(2)}`)
+    .join(" | ");
+}
+
+function getChartVariableDomain(variable) {
+  const config = getPlantConfig()[variable];
   if (!config) {
     return {
-      xMax: variable === "temp" ? 40 : 100,
-      sets: [],
-      labels: [],
-      colors: ["#2c7bb6", "#abd9e9", "#fdae61"],
-      title: "",
+      min: variable === "temp" ? -25 : 0,
+      max: variable === "temp" ? 40 : 100,
     };
   }
 
   return {
-    xMin: variable === "temp" ? -25 : 0,
-    xMax: config.xMax,
-    sets: config.sets,
-    labels: config.labels,
-    colors: ["#2c7bb6", "#abd9e9", "#fdae61"],
-    title: config.title,
+    min: variable === "temp" ? -25 : 0,
+    max: config.xMax,
   };
 }
 
-function drawFuzzyTemp() {
-  if (!fuzzyTemp) return;
-  const ctx = fuzzyTemp.getContext("2d");
+function getMarkerPercent(variable, value) {
+  const domain = getChartVariableDomain(variable);
+  const min = domain.min;
+  const max = domain.max;
 
-  const variable = chartVarSelect?.value || "temp";
-  const params = getFuzzyParams(variable);
-  const width = fuzzyTemp.width;
-  const height = fuzzyTemp.height;
-  const padding = 30;
-  const xMin = params.xMin ?? 0;
-  const xMax = params.xMax;
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = "#444";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padding, height - padding);
-  ctx.lineTo(width - 10, height - padding);
-  ctx.lineTo(width - 10, 10);
-  ctx.stroke();
-  ctx.fillStyle = "#222";
-  ctx.font = "12px Arial";
-  ctx.fillText(xMin.toString(), padding - 5, height - padding + 14);
-  ctx.fillText(xMax.toString(), width - 18, height - padding + 14);
-  ctx.fillText(params.title, padding, 18);
+  if (max === min) return 0;
 
-  params.sets.forEach((set, idx) => {
-    ctx.strokeStyle = params.colors[idx];
-    ctx.beginPath();
-    for (let x = xMin; x <= xMax; x += 1) {
-      const value = triangle(x, set[0], set[1], set[2]);
-      const px = padding + ((width - padding - 15) * (x - xMin)) / (xMax - xMin);
-      const py = height - padding - value * (height - padding - 15);
-      if (x === xMin) {
-        ctx.moveTo(px, py);
-      } else {
-        ctx.lineTo(px, py);
-      }
+  return clamp(((Number(value) - min) / (max - min)) * 100, 0, 100);
+}
+
+function normalizeFuzzySvg(svgMarkup) {
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(svgMarkup, "image/svg+xml");
+  const svgEl = svgDoc.querySelector("svg");
+
+  if (!svgEl) return svgMarkup;
+
+  // Jeśli SVG ma width/height, zamieniamy to na viewBox,
+  // żeby później dało się je skalować dowolnie CSS-em.
+  const w = svgEl.getAttribute("width");
+  const h = svgEl.getAttribute("height");
+
+  if (!svgEl.getAttribute("viewBox") && w && h) {
+    const widthNum = parseFloat(w);
+    const heightNum = parseFloat(h);
+
+    if (!Number.isNaN(widthNum) && !Number.isNaN(heightNum)) {
+      svgEl.setAttribute("viewBox", `0 0 ${widthNum} ${heightNum}`);
     }
-    ctx.stroke();
-    ctx.fillStyle = params.colors[idx];
-    ctx.fillText(params.labels[idx], width - 80, 35 + idx * 16);
-  });
+  }
 
-  const currentValue = temp;
-  const markerX =
-    padding + ((width - padding - 15) * (currentValue - xMin)) / (xMax - xMin);
-  ctx.setLineDash([4, 3]);
-  ctx.strokeStyle = "#333";
-  ctx.beginPath();
-  ctx.moveTo(markerX, height - padding);
-  ctx.lineTo(markerX, 10);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = "#333";
-  ctx.fillText(`${currentValue}°C`, markerX - 30, 28);
+  // Usuń sztywne width/height
+  svgEl.removeAttribute("width");
+  svgEl.removeAttribute("height");
+
+  // "none" = SVG ma się dopasować do boxa kosztem zniekształcenia
+  svgEl.setAttribute("preserveAspectRatio", "none");
+
+  svgEl.classList.add("fuzzy-generated-svg");
+
+  return svgEl.outerHTML;
+}
+
+function renderFuzzySvg(container, variable) {
+  if (!container) return;
+
+  if (
+    !window.fuzzyVizLib ||
+    typeof window.fuzzyVizLib.varToSvg !== "function"
+  ) {
+    container.innerHTML = `
+      <div class="fuzzy-info">
+        <strong>Błąd:</strong> @thi.ng/fuzzy-viz nie zostało załadowane.
+      </div>
+    `;
+    return;
+  }
+
+  const fuzzyVar = getFuzzyVariable(variable);
+  const currentValue = getCurrentVariableValue(variable);
+  const dominantLabel = getDominantLabel(variable, currentValue) || "brak";
+  const summary = formatMembershipSummary(variable, currentValue);
+
+  if (!fuzzyVar) {
+    container.innerHTML = `
+      <div class="fuzzy-info">
+        <strong>Błąd:</strong> brak definicji zmiennej fuzzy dla "${variable}".
+      </div>
+    `;
+    return;
+  }
+
+  let svgMarkup = "";
+
+  try {
+    const svg = window.fuzzyVizLib.varToSvg(fuzzyVar, { samples: 200 });
+    const rawSvg = typeof svg === "string" ? svg : String(svg);
+
+    // normalizujemy SVG przed wstawieniem do DOM
+    svgMarkup = normalizeFuzzySvg(rawSvg);
+  } catch (err) {
+    console.error("Błąd generowania SVG fuzzy:", variable, err);
+    container.innerHTML = `
+    <div class="fuzzy-info">
+      <strong>Błąd renderowania wykresu fuzzy:</strong> ${variable}
+    </div>
+  `;
+    return;
+  }
+
+  const markerPercent = getMarkerPercent(variable, currentValue);
+
+  container.innerHTML = `
+    <div class="fuzzy-card">
+      <div class="fuzzy-title">
+              ${getVariableTitle(variable)}
+      </div>
+      <div class="fuzzy-plot">
+        <div class="fuzzy-svg-wrap">
+          ${svgMarkup}
+
+          <div class="fuzzy-marker" style="left: ${markerPercent}%"></div>
+          <div class="fuzzy-marker-label" style="left: ${markerPercent}%">
+            ${currentValue}${variable === "temp" ? "°C" : ""}
+          </div>
+        </div>
+      </div>
+
+      <div class="fuzzy-info">
+        <div><strong>Stan:</strong> ${dominantLabel}</div>
+        <div>${summary}</div>
+      </div>
+    </div>
+  `;
+
+  const svgEl = container.querySelector("svg");
+  if (!svgEl) {
+    console.warn(`Brak elementu <svg> w renderze dla: ${variable}`, svgMarkup);
+  }
 }
 
 function drawFuzzySoil() {
-  if (!fuzzySoil) return;
-
-  const ctx = fuzzySoil.getContext("2d");
-  const variable = chartVarSelect?.value || "soil";
-  const params = getFuzzyParams(variable);
-  const width = fuzzySoil.width;
-  const height = fuzzySoil.height;
-  const padding = 30;
-
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.strokeStyle = "#444";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padding, height - padding);
-  ctx.lineTo(width - 10, height - padding);
-  ctx.lineTo(width - 10, 10);
-  ctx.stroke();
-
-  ctx.fillStyle = "#222";
-  ctx.font = "12px Arial";
-  ctx.fillText("0", padding - 5, height - padding + 14);
-  ctx.fillText(params.xMax.toString(), width - 18, height - padding + 14);
-  ctx.fillText(params.title, padding, 18);
-
-  params.sets.forEach((set, idx) => {
-    ctx.strokeStyle = params.colors[idx];
-    ctx.beginPath();
-
-    for (let x = 0; x <= params.xMax; x += 1) {
-      const value = triangle(x, set[0], set[1], set[2]);
-      const px = padding + ((width - padding - 15) * x) / params.xMax;
-      const py = height - padding - value * (height - padding - 15);
-
-      if (x === 0) {
-        ctx.moveTo(px, py);
-      } else {
-        ctx.lineTo(px, py);
-      }
-    }
-
-    ctx.stroke();
-    ctx.fillStyle = params.colors[idx];
-    ctx.fillText(params.labels[idx], width - 80, 35 + idx * 16);
-  });
-
-  const currentValue =
-    variable === "soil" ? soil : variable === "light" ? light : temp;
-  const markerX =
-    padding + ((width - padding - 15) * currentValue) / params.xMax;
-
-  ctx.setLineDash([4, 3]);
-  ctx.strokeStyle = "#333";
-  ctx.beginPath();
-  ctx.moveTo(markerX, height - padding);
-  ctx.lineTo(markerX, 10);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  ctx.fillStyle = "#333";
-  ctx.fillText(
-    `${currentValue}${variable === "temp" ? "°C" : ""}`,
-    markerX - 15,
-    28,
-  );
+  renderFuzzySvg(fuzzySoil, "soil");
 }
 
 function drawFuzzyLight() {
-  if (!fuzzyLight) return;
-  const ctx = fuzzyLight.getContext("2d");
-  const variable = "light";
-  const params = getFuzzyParams(variable);
-  const width = fuzzyLight.width;
-  const height = fuzzyLight.height;
-  const padding = 30;
+  renderFuzzySvg(fuzzyLight, "light");
+}
 
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.strokeStyle = "#444";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padding, height - padding);
-  ctx.lineTo(width - 10, height - padding);
-  ctx.lineTo(width - 10, 10);
-  ctx.stroke();
-
-  ctx.fillStyle = "#222";
-  ctx.font = "12px Arial";
-  ctx.fillText("0", padding - 5, height - padding + 14);
-  ctx.fillText(params.xMax.toString(), width - 18, height - padding + 14);
-  ctx.fillText(params.title, padding, 18);
-
-  params.sets.forEach((set, idx) => {
-    ctx.strokeStyle = params.colors[idx];
-    ctx.beginPath();
-
-    for (let x = 0; x <= params.xMax; x += 1) {
-      const value = triangle(x, set[0], set[1], set[2]);
-      const px = padding + ((width - padding - 15) * x) / params.xMax;
-      const py = height - padding - value * (height - padding - 15);
-
-      if (x === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
-    }
-
-    ctx.stroke();
-    ctx.fillStyle = params.colors[idx];
-    ctx.fillText(params.labels[idx], width - 80, 35 + idx * 16);
-  });
-
-  const currentValue = light;
-  const markerX =
-    padding + ((width - padding - 15) * currentValue) / params.xMax;
-  ctx.setLineDash([4, 3]);
-  ctx.strokeStyle = "#333";
-  ctx.beginPath();
-  ctx.moveTo(markerX, height - padding);
-  ctx.lineTo(markerX, 10);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  ctx.fillStyle = "#333";
-  ctx.fillText(`${currentValue}`, markerX - 15, 28);
+function drawFuzzyTemp() {
+  renderFuzzySvg(fuzzyTemp, "temp");
 }
 
 function drawFuzzyChart() {
@@ -259,6 +226,7 @@ function drawFuzzyChart() {
   drawFuzzyTemp();
 }
 
+// HISTORIA
 function initHistoryChart() {
   if (!historyChart || typeof Chart === "undefined") return;
 
@@ -296,7 +264,7 @@ function initHistoryChart() {
           label: "Światło",
           data: history.light,
           borderColor: "#fd7e14",
-          backgroundColor: "rgba(253,126,20,0.12)",
+          backgroundColor: "rgba(203, 195, 189, 0.12)",
           fill: true,
           tension: 0.2,
           pointBackgroundColor: "#fd7e14",
@@ -342,9 +310,9 @@ function initHistoryChart() {
         title: {
           display: true,
           position: "top",
-          align: "start",
+          align: "center",
           padding: { top: 10, bottom: 10 },
-          text: "Historia",
+          text: "⏳ Historia ⏳",
         },
       },
       layout: {

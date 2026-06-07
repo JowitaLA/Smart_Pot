@@ -62,27 +62,122 @@ input[type="range"] {
   transform: scale(1.1);
 }
 
-#fuzzyChart {
-  margin-top: 5px;
-  border-radius: 8px;
+/* =========================================
+   FUZZY WYKRESY (SVG z @thi.ng/fuzzy-viz)
+   ========================================= */
+
+/* =========================================
+   FUZZY WYKRESY (SVG z @thi.ng/fuzzy-viz)
+   ========================================= */
+
+.fuzzy-chart {
   width: 100%;
-  max-width: 500px;
-  height: auto;
+  max-width: 300px;
+  height: 150px;
+  margin-top: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-#historyChart {
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  width: 300px !important;
-  height: 150px !important;
+.fuzzy-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fuzzy-title {
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+}
+
+.fuzzy-plot {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.fuzzy-svg-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  border-radius: 8px;
+
+  transform-origin: center top;
+}
+
+.fuzzy-svg-wrap svg {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+}
+
+.fuzzy-svg-wrap svg text {
+  font-size: 17px !important;
+  font-weight: 450 !important;
+}
+
+/* pionowy marker aktualnej wartości */
+.fuzzy-marker {
+  position: absolute;
+  top: 8px;
+  bottom: 10px;
+  width: 0;
+  border-left: 2px dashed #333;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* etykieta aktualnej wartości */
+.fuzzy-marker-label {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 11px;
+  color: #222;
+  white-space: nowrap;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.fuzzy-info {
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: #222;
+  text-align: left;
+  word-break: break-word;
+  padding: 0 1px 2px 1px;
+}
+
+.fuzzy-info strong {
+  font-weight: 600;
 }
 
 #fuzzySoil,
 #fuzzyLight,
-#fuzzyTemp,
-#historyChart {
+#fuzzyTemp {
   display: block;
   margin-top: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+#historyChart {
+  border: 1px solid rgba(42, 42, 42, 0.15);
+  margin-top: 10px;
+  width: 300px !important;
+  height: 150px !important;
   border-radius: 10px;
   background: #fff;
 }
@@ -93,14 +188,6 @@ input[type="range"] {
   font-size: 12px;
   white-space: nowrap;
   z-index: 10;
-}
-
-.history-legend {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 12px;
-  font-size: 14px;
-  color: #222;
 }
 
 .legend-dot {
@@ -330,6 +417,30 @@ input[type="range"] {
   z-index: 5;
 }
 
+.custom-button {
+  background: transparent;
+  color: #2f6b73; /*rgb(189, 72, 88)*/
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.6));
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* HOVER */
+.custom-button:hover {
+  transform: scale(1.15);
+  /* powiększenie */
+  opacity: 0.95;
+  color: #367a81;
+
+  /* cień rośnie razem z ikoną */
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+}
+
 /* Przyciski nawigacyjne */
 #buttonNextHour {
   position: absolute;
@@ -419,7 +530,7 @@ input[type="range"] {
   opacity: 0;
   transform: translateY(0);
   transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease;
-  filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+  filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
 }
 
 #lampLightOn.visible,
@@ -437,7 +548,7 @@ input[type="range"] {
 }
 
 /* Przycisk lampy */
-#buttonLight{
+#buttonLight {
   position: absolute;
   background: rgba(255, 200, 1, 0.93) !important;
   border: 3px solid rgba(192, 133, 45, 0.5);
@@ -449,6 +560,7 @@ input[type="range"] {
   z-index: 5;
   transition: background 0.3s, transform 0.2s;
 }
+
 #buttonLight:hover {
   background: rgba(255, 200, 1, 1) !important;
   border: 3px solid rgba(192, 133, 45, 0.6);
@@ -457,7 +569,7 @@ input[type="range"] {
 }
 
 /* Przycisk lampy */
-#buttonHeater{
+#buttonHeater {
   position: absolute;
   background: rgba(195, 24, 12, 0.93) !important;
   border: 3px solid rgba(107, 57, 17, 0.5);
@@ -469,6 +581,7 @@ input[type="range"] {
   z-index: 5;
   transition: background 0.3s, transform 0.2s;
 }
+
 #buttonHeater:hover {
   background: rgba(195, 24, 12, 1) !important;
   border: 3px solid rgba(107, 57, 17, 0.6);
@@ -533,7 +646,7 @@ input[type="range"] {
 }
 
 /* Przycisk lampy */
-#buttonWind{
+#buttonWind {
   position: absolute;
   background: rgba(185, 186, 187, 0.93) !important;
   border: 3px solid rgba(186, 211, 220, 0.5);
@@ -545,6 +658,7 @@ input[type="range"] {
   z-index: 5;
   transition: background 0.3s, transform 0.2s;
 }
+
 #buttonWind:hover {
   background: rgba(187, 187, 185, 1) !important;
   border: 3px solid rgba(206, 205, 203, 0.6);
@@ -564,6 +678,7 @@ input[type="range"] {
   z-index: 5;
   transition: background 0.3s, transform 0.2s;
 }
+
 #buttonSplatter:hover {
   background: rgba(136, 210, 234, 1) !important;
   border: 3px solid rgba(110, 175, 197, 0.6);
@@ -583,6 +698,7 @@ input[type="range"] {
   z-index: 5;
   transition: background 0.3s, transform 0.2s;
 }
+
 #buttonPumping:hover {
   background: rgba(210, 129, 16, 1) !important;
   border: 3px solid rgba(169, 80, 7, 0.6);
@@ -602,6 +718,7 @@ input[type="range"] {
   z-index: 5;
   transition: background 0.3s, transform 0.2s;
 }
+
 #buttonWatering:hover {
   background: rgba(25, 192, 175, 1) !important;
   border: 3px solid rgba(50, 159, 147, 0.6);
@@ -636,7 +753,14 @@ input[type="range"] {
   z-index: 1;
 }
 
-#potSmartOn, #potCold, #potHot, #potMist, #potShade, #potSun, #potWater, #potStatus {
+#potSmartOn,
+#potCold,
+#potHot,
+#potMist,
+#potShade,
+#potSun,
+#potWater,
+#potStatus {
   position: absolute;
   height: 100%;
   width: auto;
@@ -661,7 +785,7 @@ input[type="range"] {
   width: 100%;
   height: 10%;
   left: 0;
-  background: linear-gradient(to bottom, #8b7355, #654321);
+  background: linear-gradient(to bottom, #a17b4c, #a7816b);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 

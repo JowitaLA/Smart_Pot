@@ -1,15 +1,18 @@
+// Plik script.js odpowiedzialny jest za podstawowe parametry, implementacje funkcji fuzzy oraz ich analiz oraz start samego symulatora. 
+
 // ZMIENNE GRY
-// 1. Czas
+// Czas
 const seasons = ["winter", "spring", "summer", "autumn"]; // pory roku
 
 let time = 8;       // godzina
 let totalDay = 0;   // dzień
 let seasonDay = 0;  // dzień w aktualnej porze roku
 
-// 2. Podstawowe parametry rośliny i doniczki
+// Podstawowe parametry rośliny i doniczki
 let season = "spring";  // aktualna pora roku
-let plant = "storczyk"; // aktualna roślina (domyślnie storczyk, można zmieniać na kaktus lub paprotkę)
+let plant = "storczyk"; // aktualna roślina
 
+// Parametry do trybu własnego
 let customSeasonActive = false;
 let customSeasonConfig = {
   tempMin: -10,
@@ -19,13 +22,13 @@ let customSeasonConfig = {
   soilDrain: 0.5,
 };
 
+// Podstawowe parametry środowiska
 let soil = 50;    // wilgotność gleby
 let light = 50;   // światło
 let temp = 20;    // temperatura
 let health = 80;  // zdrowie rośliny (0-100)
 
-// Device control variables moved to js/actions.js
-let smartMode = false;
+let smartMode = false; // stan trybu SMART
 let shutterActive = false;  // stan rolety
 
 // POBIERANIE ELEMENTÓW
@@ -34,14 +37,11 @@ const msgState = document.getElementById("msgState");
 const msgInfo = document.getElementById("msgInfo");
 const msgSeason = document.getElementById("msgSeason");
 
-// Elementy interfejsu
+// Tło
 const sky = document.getElementById("sky");
 
-// Wykresy rozmyte
+// Select zmiennej do wykresu fuzzy
 const chartVarSelect = document.getElementById("chartVar");
-const fuzzySoilChart = document.getElementById("fuzzySoil");
-const fuzzyLightChart = document.getElementById("fuzzyLight");
-const fuzzyTempChart = document.getElementById("fuzzyTemp");
 
 // Kontrolki nowych roślin
 const healthNewPlant = document.getElementById("healthNewPlant");
@@ -49,17 +49,19 @@ const soilNewPlant = document.getElementById("soilNewPlant");
 const lightNewPlant = document.getElementById("lightNewPlant");
 const tempNewPlant = document.getElementById("tempNewPlant");
 
+// Liczba dni
 const days = document.getElementById("days");
 
 // PARAMETRY ROŚLIN
 const plantFuzzyConfig = {
-  storczyk: {
+  
+storczyk: {
     soil: {
       xMax: 100,
       sets: [
-        [0, 0, 35],
-        [30, 50, 70],
-        [65, 80, 100],
+        [0, 0, 15, 35],       // Suche - miękki lewy trapez
+        [30, 50, 70],         // Optymalne - trójkąt
+        [65, 80, 95, 100],    // Mokre - miękki prawy trapez
       ],
       labels: ["Suche", "Optymalne", "Mokre"],
       title: "Wilgotność gleby",
@@ -67,9 +69,9 @@ const plantFuzzyConfig = {
     light: {
       xMax: 100,
       sets: [
-        [0, 0, 30],
-        [25, 50, 75],
-        [70, 85, 100],
+        [0, 0, 15, 35],       // Ciemne
+        [25, 50, 75],         // Optymalne
+        [70, 85, 95, 100],    // Jasne
       ],
       labels: ["Ciemne", "Optymalne", "Jasne"],
       title: "Światło",
@@ -77,21 +79,22 @@ const plantFuzzyConfig = {
     temp: {
       xMax: 40,
       sets: [
-        [-25, 0, 16],
-        [14, 21, 28],
-        [26, 33, 40],
+        [-25, -25, 5, 17],   // Zimno
+        [16, 21, 27],         // Optymalne
+        [25, 31, 40, 40],     // Gorąco
       ],
       labels: ["Zimno", "Optymalne", "Gorąco"],
       title: "Temperatura",
     },
   },
+
   kaktus: {
     soil: {
       xMax: 100,
       sets: [
-        [0, 0, 15],
-        [10, 25, 40],
-        [35, 60, 100],
+        [0, 0, 8, 18],        // Suche
+        [12, 25, 38],         // Optymalne
+        [35, 50, 75, 100],    // Mokre
       ],
       labels: ["Suche", "Optymalne", "Mokre"],
       title: "Wilgotność gleby",
@@ -99,31 +102,32 @@ const plantFuzzyConfig = {
     light: {
       xMax: 100,
       sets: [
-        [0, 0, 50],
-        [45, 70, 90],
-        [85, 100, 100],
+        [0, 0, 15, 45],       // Ciemne
+        [45, 70, 90],         // Optymalne
+        [80, 92, 100, 100],   // Jasne
       ],
       labels: ["Ciemne", "Optymalne", "Jasne"],
       title: "Światło",
     },
     temp: {
-      xMax: 50,
+      xMax: 40,
       sets: [
-        [-25, 0, 22],
-        [18, 28, 35],
-        [32, 45, 50],
+        [-25, -25, 10, 20],   // Zimno
+        [18, 28, 35],         // Optymalne
+        [32, 38, 40, 40],     // Gorąco
       ],
       labels: ["Zimno", "Optymalne", "Gorąco"],
       title: "Temperatura",
     },
   },
+
   paprotka: {
     soil: {
       xMax: 100,
       sets: [
-        [0, 0, 50],
-        [45, 65, 85],
-        [80, 90, 100],
+        [0, 0, 35, 55],       // Suche
+        [50, 65, 80],         // Optymalne
+        [75, 85, 100, 100],   // Mokre
       ],
       labels: ["Suche", "Optymalne", "Mokre"],
       title: "Wilgotność gleby",
@@ -131,19 +135,19 @@ const plantFuzzyConfig = {
     light: {
       xMax: 100,
       sets: [
-        [0, 0, 20],
-        [15, 30, 50],
-        [45, 70, 100],
+        [0, 0, 10, 25],       // Ciemne
+        [15, 30, 50],         // Optymalne
+        [45, 60, 100, 100],   // Jasne
       ],
       labels: ["Ciemne", "Optymalne", "Jasne"],
       title: "Światło",
     },
     temp: {
-      xMax: 50,
+      xMax: 40,
       sets: [
-        [-25, 0, 18],
-        [16, 22, 28],
-        [25, 35, 50],
+        [-25, -25, 10, 19],   // Zimno
+        [18, 22, 27],         // Optymalne
+        [25, 32, 40, 40],     // Gorąco
       ],
       labels: ["Zimno", "Optymalne", "Gorąco"],
       title: "Temperatura",
@@ -151,24 +155,24 @@ const plantFuzzyConfig = {
   },
 };
 
+// PARAMETRY AKTYWNE ROŚLIN
 const plantRateConfig = {
   storczyk: {
-    soilDrain: 0.8,
-    lightGain: 1.2,
-    tempAdaptation: 0.14,
+    soilDrain: 0.8,       //tempo zużywania wody
+    tempAdaptation: 0.14, //adaptacja do temperatury
   },
   kaktus: {
     soilDrain: 0.4,
-    lightGain: 1.6,
     tempAdaptation: 0.10,
   },
   paprotka: {
     soilDrain: 1.1,
-    lightGain: 1.0,
     tempAdaptation: 0.16,
   },
 };
 
+// PARAMETRY PÓR ROKU
+// Zakres temperatur dla pór roku
 const seasonTempRanges = {
   winter: { min: -25, max: 5 },
   spring: { min: 0, max: 22 },
@@ -176,6 +180,7 @@ const seasonTempRanges = {
   autumn: { min: 5, max: 15 },
 };
 
+// Harmonogram światła w ciągu dnia
 const seasonLightSchedule = {
   winter: [
     { from: 0, to: 7, value: 0 },
@@ -215,6 +220,7 @@ const seasonLightSchedule = {
   ],
 };
 
+// Tempo wysychania gleby zależne od sezonu
 const seasonSoilDrain = {
   winter: 0.1,
   spring: 0.5,
@@ -222,28 +228,228 @@ const seasonSoilDrain = {
   autumn: 0.25,
 };
 
-// FUNKCJE PRZYNALEŻNOŚCI
+// FUNKCJE FUZZY
+// Skrót do biblioteki fuzzy
+const fuzzy = window.fuzzyLib;
+
+// LOKALNE FUNKCJE PRZYNALEŻNOŚCI
+//Funkcja trójkątna przynależności
 function triangle(x, a, b, c) {
+  x = Number(x);
+  a = Number(a);
+  b = Number(b);
+  c = Number(c);
+
+  if ([x, a, b, c].some(Number.isNaN)) return 0;
+
+  // pojedynczy punkt
+  if (a === b && b === c) return x === a ? 1 : 0;
+
+  // lewe ramię: [a, a, c]
+  if (a === b) {
+    if (x <= b) return 1;
+    if (x >= c) return 0;
+    return (c - x) / (c - b);
+  }
+
+  // prawe ramię: [a, b, b]
+  if (b === c) {
+    if (x <= a) return 0;
+    if (x >= b) return 1;
+    return (x - a) / (b - a);
+  }
+
+  // zwykły trójkąt
   if (x <= a || x >= c) return 0;
-  if (x == b) return 1;
-  if (x > a && x < b) return (x - a) / (b - a);
+  if (x === b) return 1;
+  if (x < b) return (x - a) / (b - a);
   return (c - x) / (c - b);
 }
 
-chartVarSelect?.addEventListener("change", updateUI);
+//Funkcja trapezowa przynależności
+function trapezoid(x, a, b, c, d) {
+  x = Number(x);
+  a = Number(a);
+  b = Number(b);
+  c = Number(c);
+  d = Number(d);
 
-function getSoilFuzzyState(value) {
-  const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-  const soilSets = plantConfig.soil.sets;
+  if ([x, a, b, c, d].some(Number.isNaN)) return 0;
 
-  return {
-    dry: triangle(value, ...soilSets[0]),
-    optimal: triangle(value, ...soilSets[1]),
-    wet: triangle(value, ...soilSets[2]),
-  };
+  // punkty muszą być rosnące
+  if (!(a <= b && b <= c && c <= d)) return 0;
+
+  // poza zakresem
+  if (x < a || x > d) return 0;
+
+  // plateau
+  if (x >= b && x <= c) return 1;
+
+  // narastanie
+  if (x >= a && x < b) {
+    return a === b ? 1 : (x - a) / (b - a);
+  }
+
+  // opadanie
+  if (x > c && x <= d) {
+    return c === d ? 1 : (d - x) / (d - c);
+  }
+
+  return 0;
 }
 
-// INIT
+// Obliczanie przynależności dla dowolnego zbioru (triangle/trapezoid)
+function evaluateSet(x, set) {
+  if (!Array.isArray(set)) return 0;
+
+  // 3 punkty = triangle / shoulder
+  if (set.length === 3) {
+    return triangle(x, set[0], set[1], set[2]);
+  }
+
+  // 4 punkty = trapez
+  if (set.length === 4) {
+    return trapezoid(x, set[0], set[1], set[2], set[3]);
+  }
+
+  return 0;
+}
+
+// Ograniczanie wartości do zakresu
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+// Pobranie aktualnych parametrów rośliny
+function getPlantConfig() {
+  return plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
+}
+
+// Cache zmiennych fuzzy zbudowanych z konfiguracji roślin
+const fuzzyVariableCache = {};
+
+// Tworzenie zakresu zmiennej (np. temp ma -25 start)
+function getVariableDomain(variableName, config) {
+  return [variableName === "temp" ? -25 : 0, config.xMax];
+}
+
+// Budowanie natywnego zbioru fuzzy dla biblioteki
+function buildNativeFuzzySet(set) {
+  if (!Array.isArray(set)) {
+    return fuzzy.point(0);
+  }
+
+  // 3 punkty = triangle / shoulder
+  if (set.length === 3) {
+    const [a, b, c] = set;
+
+    if (a === b && b === c) {
+      return fuzzy.point(a);
+    }
+    if (a === b) {
+      return fuzzy.invRamp(b, c);   // lewe ramię
+    }
+    if (b === c) {
+      return fuzzy.ramp(a, b);      // prawe ramię
+    }
+
+    return fuzzy.triangle(a, b, c);
+  }
+
+  // 4 punkty = trapez / shoulder
+  if (set.length === 4) {
+    const [a, b, c, d] = set;
+
+    if (a === b) {
+      return fuzzy.invRamp(c, d);   // lewe ramię trapezowe
+    }
+    if (c === d) {
+      return fuzzy.ramp(a, b);      // prawe ramię trapezowe
+    }
+
+    return fuzzy.trapezoid(a, b, c, d);
+  }
+
+  return fuzzy.point(0);
+}
+
+// Budowanie zmiennej fuzzy (z labelkami i zbiorami)
+function buildFuzzyVariable(variableName, config) {
+  const terms = Object.fromEntries(
+    config.labels.map((label, index) => [
+      label,
+      buildNativeFuzzySet(config.sets[index]),
+    ])
+  );
+
+  return fuzzy.variable(getVariableDomain(variableName, config), terms);
+}
+
+// Zwracanie zmiennej fuzzy z cache (lub tworzenie jej)
+function getFuzzyVariable(variableName) {
+  const key = `${plant}:${variableName}`;
+  if (fuzzyVariableCache[key]) {
+    return fuzzyVariableCache[key];
+  }
+
+  const config = getPlantConfig()[variableName];
+  if (!config) return null;
+
+  const fuzzyVar = buildFuzzyVariable(variableName, config);
+  fuzzyVariableCache[key] = fuzzyVar;
+  return fuzzyVar;
+}
+
+// ANALIZA PRZYNALEŻNOŚCI
+// Zwracanie obiektu w stylu:
+// { "Suche": 0.2, "Optymalne": 0.8, "Mokre": 0 }
+function getMembershipMap(variableName, value) {
+  const config = getPlantConfig()[variableName];
+  if (!config) return {};
+
+  const numericValue = Number(value);
+
+  return Object.fromEntries(
+    config.labels.map((label, index) => [
+      label,
+      evaluateSet(numericValue, config.sets[index]),
+    ])
+  );
+}
+
+// Zwracanie tablicy membershipów w kolejności zgodnej z `config.labels`
+// np. [dry, optimal, wet]
+function getMemberships(variableName, value) {
+  const config = getPlantConfig()[variableName];
+  if (!config) return [0, 0, 0];
+
+  const membershipMap = getMembershipMap(variableName, value);
+  return config.labels.map((label) => membershipMap[label] ?? 0);
+}
+
+// Zwracanie nazwy dominującego zbioru, np. "Optymalne"
+function getDominantLabel(variableName, value, threshold = 0.02) {
+  const config = getPlantConfig()[variableName];
+  if (!config) return null;
+
+  const memberships = getMemberships(variableName, value);
+  const maxVal = Math.max(...memberships);
+
+  if (maxVal < threshold) return null;
+  return config.labels[memberships.indexOf(maxVal)];
+}
+
+
+// Wystawienie helperów globalnie 
+// (przyda się do testów i w kolejnych plikach)
+window.clamp = clamp;
+window.getPlantConfig = getPlantConfig;
+window.getFuzzyVariable = getFuzzyVariable;
+window.getMembershipMap = getMembershipMap;
+window.getMemberships = getMemberships;
+window.getDominantLabel = getDominantLabel;
+
+// START APLIKACJI
 window.addEventListener("load", () => {
   resetHistory();
   updateUI();

@@ -1,4 +1,4 @@
-// Plik w którym znajdują się funkcje sterujące urządzeniami takimi jak:
+// Plik actions.js to miejsce w którym znajdują się funkcje sterujące urządzeniami takimi jak:
 // wentylator, zraszacz, pompa, lampa. 
 // Odpowiadają za aktualizację stanu urządzeń, widokiem i logiką sterowania (smart/manual).
 
@@ -73,30 +73,30 @@ function updateTempVisuals() {
 function syncMoistureControl() {
   const currentSoil = Number(soil);
 
-  // Jeśli smart jest ON, dążymy do środka zbioru 'Optymalne' (wartość b trójkąta)
   if (smartMode) {
-    const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-    const optimalCenter = plantConfig.soil.sets[1][1];
-    const margin = 1.5; // tolerancja wilgotności
+    // Pobieramy stopnie przynależności fuzzy dla wilgotności gleby:
+    // [Suche, Optymalne, Mokre]
+    const [dry, optimal, wet] = getMemberships("soil", currentSoil);
 
-    if (currentSoil < optimalCenter - margin) {
-      moistureControlState.watering = true;
-      moistureControlState.pumping = false;
-    } else if (currentSoil > optimalCenter + margin) {
-      moistureControlState.watering = false;
-      moistureControlState.pumping = true;
-    } else {
-      moistureControlState.watering = false;
-      moistureControlState.pumping = false;
-    }
-  // Jeśli smart jest OFF, używaj manual override (podlewanie/pompa działają od razu)
+    // Jeśli roślina jest bardziej "sucha" niż "mokra" i ten stan jest zauważalny,
+    // to włączamy podlewanie.
+    moistureControlState.watering =
+      dry > 0.1 && dry >= wet && dry >= optimal;
+
+    // Jeśli roślina jest bardziej "mokra" niż "sucha" i ten stan jest zauważalny,
+    // to włączamy odpompowywanie.
+    moistureControlState.pumping =
+      wet > 0.1 && wet > dry && wet >= optimal;
   } else if (moistureControlMode === "watering") {
+    // Tryb ręczny: podlewanie
     moistureControlState.watering = true;
     moistureControlState.pumping = false;
   } else if (moistureControlMode === "pumping") {
+    // Tryb ręczny: odpompowywanie
     moistureControlState.watering = false;
     moistureControlState.pumping = true;
   } else {
+    // Brak aktywnego sterowania
     moistureControlState.watering = false;
     moistureControlState.pumping = false;
   }
@@ -104,24 +104,46 @@ function syncMoistureControl() {
   updateMoistureVisuals();
 }
 
-// Tryb SMART dla wentylatora - smart ma priorytet
+// Tryb SMART dla temperatury - smart ma priorytet
 function syncTempControl() {
   const currentTemp = Number(temp);
   const currentSoil = Number(soil);
-  const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-  const optimalTempCenter = plantConfig.temp.sets[1][1];
-  const optimalSoilCenter = plantConfig.soil.sets[1][1];
-  const tempMargin = 0.8;
-  const soilMargin = 1.5;
+
+  // Lokalne ustawienia czułości
+  const ventilationActivation = 0.02; // wentylacja reaguje już przy lekkim przegrzaniu
+  const mistingHotActivation = 0.02;  // zraszanie przy lekkim przegrzaniu
+  const mistingDryActivation = 0.08;  // zraszanie przy przesuszeniu
+  const mistingColdActivation = 0.02; // opcjonalna reakcja przy chłodzie (obszar wspólny)
+
+  const config = getPlantConfig();
+  const tempOptimalCenter = config.temp.sets[1][1];
+  const soilOptimalCenter = config.soil.sets[1][1];
+
+  // Membershipy fuzzy
+  const tempMap = getMembershipMap("temp", currentTemp);
+  const soilMap = getMembershipMap("soil", currentSoil);
+
+  const cold = tempMap["Zimno"] ?? 0;
+  const hot = tempMap["Gorąco"] ?? 0;
+  const dry = soilMap["Suche"] ?? 0;
 
   if (smartMode) {
-    // Zraszacz działa gdy: temperatura za zimno/gorąco LUB za mało wody
-    const tempExtreme = currentTemp < optimalTempCenter - tempMargin || currentTemp > optimalTempCenter + tempMargin;
-    const soilTooLow = currentSoil < optimalSoilCenter - soilMargin;
-    
-    tempControlState.misting = tempExtreme || soilTooLow;
-    tempControlState.ventilation = currentTemp > optimalTempCenter + tempMargin;
+    // Wentylacja działa, gdy robi się choć trochę za gorąco
+    // i temperatura jest po prawej stronie optimum
+    tempControlState.ventilation =
+      hot > ventilationActivation && currentTemp > tempOptimalCenter;
+
+    // Zraszanie działa szerzej:
+    // - gdy gorąco,
+    // - gdy sucho,
+    // - oraz delikatnie przy chłodzie na obszarze wspólnym zbiorów,
+    //   jeśli nadal jesteśmy po lewej stronie optimum
+    tempControlState.misting =
+      (hot > mistingHotActivation && currentTemp > tempOptimalCenter) ||
+      (dry > mistingDryActivation && currentSoil < soilOptimalCenter) ||
+      (cold > mistingColdActivation && currentTemp < tempOptimalCenter);
   } else if (tempControlMode.misting || tempControlMode.ventilation) {
+    // Tryb ręczny
     tempControlState.misting = !!tempControlMode.misting;
     tempControlState.ventilation = !!tempControlMode.ventilation;
   } else {
@@ -132,36 +154,63 @@ function syncTempControl() {
   updateTempVisuals();
 }
 
-// Sterowanie temperaturą - smart ma priorytet
+// Sterowanie temperaturą i zraszaniem - smart ma priorytet
 function applyTempControl() {
   let currentTemp = Number(temp);
   let currentSoil = Number(soil);
 
-  if (smartMode) {
-    const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-    const optimalCenter = plantConfig.temp.sets[1][1];
-    const margin = 0.8;
+  // Lokalne ustawienia mocy
+  const mistingWaterPower = 3.0;       // ile wilgoci dodaje zraszanie
+  const mistingCoolPower = 0.9;        // jak bardzo zraszanie obniża temperaturę
+  const ventilationCoolPower = 2.6;    // jak mocno wentylacja chłodzi
+  const ventilationDryLoss = 1.2;      // ile wentylacja odbiera wilgoci
 
-    if (currentTemp > optimalCenter + margin) {
-      currentTemp = Math.max(-50, currentTemp - 1);
-      currentSoil = Math.max(0, currentSoil - 1);
-    } else if (currentTemp < optimalCenter - margin) {
-      currentSoil = Math.min(100, currentSoil + 1);
-      currentTemp = Math.max(-50, currentTemp + 0.5);
-    }
+  const hotSoilLoss = 0.5;             // dodatkowa utrata wilgoci przy przegrzaniu
+  const coldSoilBoost = 0.8;           // lekkie wsparcie wilgotności przy chłodzie
+
+  if (smartMode) {
+    // Membershipy fuzzy
+    const tempMap = getMembershipMap("temp", currentTemp);
+    const soilMap = getMembershipMap("soil", currentSoil);
+
+    const cold = tempMap["Zimno"] ?? 0;
+    const hot = tempMap["Gorąco"] ?? 0;
+    const dry = soilMap["Suche"] ?? 0;
+
+    // Zraszanie:
+    // - zwiększa wilgotność przy suchości,
+    // - może delikatnie działać także przy chłodzie,
+    // - i lekko schładza przy wysokiej temperaturze
+    currentSoil += Math.max(dry, cold) * mistingWaterPower;
+    currentTemp -= hot * mistingCoolPower;
+
+    // Wentylacja:
+    // - głównie chłodzi,
+    // - ale przy okazji osusza
+    currentTemp -= hot * ventilationCoolPower;
+    currentSoil -= hot * ventilationDryLoss;
+
+    // Dodatkowe dopracowanie bilansu wilgoci:
+    // - gdy bardzo gorąco, wilgoć szybciej ucieka
+    currentSoil -= hot * hotSoilLoss;
+
+    // - gdy chłodno, wilgoć może się trochę łatwiej utrzymywać
+    currentSoil += cold * coldSoilBoost;
   } else if (tempControlMode.misting || tempControlMode.ventilation) {
+    // Tryb ręczny zostawiamy podobnie jak wcześniej
     if (tempControlMode.misting) {
-      currentSoil = Math.min(100, currentSoil + 2);
-      currentTemp = Math.max(-50, currentTemp - 0.8);
+      currentSoil = Math.min(100, currentSoil + mistingWaterPower);
+      currentTemp = Math.max(-25, currentTemp - mistingCoolPower);
     }
+
     if (tempControlMode.ventilation) {
-      currentTemp = Math.max(-50, currentTemp - 1.8);
-      currentSoil = Math.max(0, currentSoil - 1);
+      currentTemp = Math.max(-25, currentTemp - ventilationCoolPower);
+      currentSoil = Math.max(0, currentSoil - ventilationDryLoss);
     }
   }
 
-  temp = String(Number(currentTemp.toFixed(1)));
-  soil = String(Math.round(currentSoil));
+  temp = String(Number(clamp(currentTemp, -25, 50).toFixed(1)));
+  soil = String(Math.round(clamp(currentSoil, 0, 100)));
 
   syncTempControl();
   updateUI();
@@ -187,32 +236,48 @@ function splatterFan() { toggleMisting(); }
 function applyMoistureControl() {
   let currentSoil = Number(soil);
 
-  // SMART ma priorytet: dążymy do środka optymalnego
   if (smartMode) {
-    const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-    const optimalCenter = plantConfig.soil.sets[1][1];
-    const margin = 1.5;
-    const lowTarget = optimalCenter - margin;
-    const highTarget = optimalCenter + margin;
+    // Membershipy fuzzy dla wilgotności gleby:
+    // [Suche, Optymalne, Mokre]
+    const [dry, optimal, wet] = getMemberships("soil", currentSoil);
 
-    while (currentSoil < lowTarget) {
-      currentSoil = Math.min(100, currentSoil + 1);
+    // Środek zbioru optymalnego
+    const optimalCenter = getPlantConfig().soil.sets[1][1];
+
+    // Ustalamy "bezpieczny" zakres wokół optimum.
+    // Zamiast sztywnego sterowania progiem jako główną decyzją,
+    // używamy fuzzy do decyzji, a ten zakres służy tylko jako cel końcowy.
+    const targetMargin = 1.5;
+    const lowTarget = optimalCenter - targetMargin;
+    const highTarget = optimalCenter + targetMargin;
+
+    // Jeśli dominuje "Suche", podlewamy tak długo,
+    // aż dojdziemy do dolnej granicy zakresu optymalnego.
+    if (dry > 0.1 && dry >= wet && dry >= optimal) {
+      while (currentSoil < lowTarget) {
+        currentSoil = Math.min(100, currentSoil + 1);
+      }
     }
-    while (currentSoil > highTarget) {
-      currentSoil = Math.max(0, currentSoil - 1);
+
+    // Jeśli dominuje "Mokre", odpompowujemy tak długo,
+    // aż dojdziemy do górnej granicy zakresu optymalnego.
+    if (wet > 0.1 && wet > dry && wet >= optimal) {
+      while (currentSoil > highTarget) {
+        currentSoil = Math.max(0, currentSoil - 1);
+      }
     }
 
     soil = String(Math.round(currentSoil));
-  // Manualne podlewanie/pompowanie działa natychmiast gdy SMART wyłączony
   } else if (moistureControlMode === "watering") {
+    // Tryb ręczny: jedno mocniejsze podlanie
     currentSoil = Math.min(100, currentSoil + 4);
     soil = String(Math.round(currentSoil));
   } else if (moistureControlMode === "pumping") {
+    // Tryb ręczny: jedno mocniejsze odpompowanie
     currentSoil = Math.max(0, currentSoil - 4);
     soil = String(Math.round(currentSoil));
   }
 
-  // Aktualizuj widok nawodnienia
   syncMoistureControl();
   updateUI();
 }
@@ -228,8 +293,6 @@ function pumpingFan() {
   moistureControlMode = moistureControlMode === "pumping" ? "static" : "pumping";
   applyMoistureControl();
 }
-
-
 
 // LAMPA //
 // Sterowanie lampą i tryby
@@ -257,40 +320,67 @@ function updateLampVisuals() {
 function syncLampControl() {
   const currentLight = Number(light);
   const currentTemp = Number(temp);
-  const plantConfig = plantFuzzyConfig[plant] || plantFuzzyConfig.storczyk;
-  const lightSets = plantConfig.light.sets;
-  const tempSets = plantConfig.temp.sets;
 
-  const optimalLightCenter = lightSets[1][1];
-  const optimalTempCenter = tempSets[1][1];
-  const lightMargin = 6; // procentowe punkty
-  const tempMargin = 0.8; // °C
+  // Lokalne ustawienia czułości
+  const darkActivation = 0.02;   // lampka reaguje już przy lekkiej ciemności
+  const coldActivation = 0.02;   // grzałka reaguje już przy lekkim chłodzie
 
-  // Automatyczne sterowanie roletą przy włączonym SMART
+  const brightShutterThreshold = 0.35;
+  const darkShutterThreshold = 0.02;
+  const shutterFactor = 0.8;     
+
+  const config = getPlantConfig();
+  const lightOptimalCenter = config.light.sets[1][1];
+  const tempOptimalCenter = config.temp.sets[1][1];
+
+  // Membershipy światła przed działaniem rolety
+  const rawLightMap = getMembershipMap("light", currentLight);
+  const rawDark = rawLightMap["Ciemne"] ?? 0;
+  const rawBright = rawLightMap["Jasne"] ?? 0;
+
   if (smartMode) {
-    // Decyzję podejmujemy na podstawie surowej wartości "currentLight"
-    // (zanim zastosowany zostanie efekt rolety). Zachowujemy stan,
-    // jeśli jesteśmy w strefie tolerancji (histereza).
     let desiredShutter = shutterActive;
-    if (currentLight > optimalLightCenter + lightMargin) {
-      desiredShutter = true; // za jasno -> zasłoń roletę
-    } else if (currentLight < optimalLightCenter - lightMargin) {
-      desiredShutter = false; // za ciemno -> odsłoń roletę
+
+    // Roleta zasłania tylko wtedy, gdy faktycznie robi się jasno
+    if (rawBright > brightShutterThreshold && rawBright > rawDark) {
+      desiredShutter = true;
     }
+    // Gdy tylko zaczyna być ciemno, odsłaniamy
+    else if (rawDark > darkShutterThreshold && rawDark >= rawBright) {
+      desiredShutter = false;
+    }
+
     if (desiredShutter !== shutterActive) {
       shutterActive = desiredShutter;
       const shutterEl = document.querySelector(".shutter");
-      if (shutterEl) shutterEl.style.display = shutterActive ? "block" : "none";
+      if (shutterEl) {
+        shutterEl.style.display = shutterActive ? "block" : "none";
+      }
     }
   }
 
-  const shutterEffect = shutterActive ? 0.5 : 1.0;
-  const effectiveLight = currentLight * shutterEffect;
+  // Roleta wpływa tylko na światło zastane / naturalne
+  const effectiveLight = currentLight * (shutterActive ? shutterFactor : 1.0);
 
-  // Jeśli smart jest ON, dążymy do środka zbioru optymalnego (priorytet)
+  const lightMap = getMembershipMap("light", effectiveLight);
+  const tempMap = getMembershipMap("temp", currentTemp);
+
+  const dark = lightMap["Ciemne"] ?? 0;
+  const bright = lightMap["Jasne"] ?? 0;
+
+  const cold = tempMap["Zimno"] ?? 0;
+  const hot = tempMap["Gorąco"] ?? 0;
+
   if (smartMode) {
-    lampControlState.light = effectiveLight < optimalLightCenter - lightMargin;
-    lampControlState.heat = Number(currentTemp) < optimalTempCenter - tempMargin;
+    // Lampka ma się włączać już wtedy, gdy jest choć trochę za ciemno
+    // i jesteśmy po lewej stronie optimum
+    lampControlState.light =
+      dark > darkActivation && effectiveLight < lightOptimalCenter;
+
+    // Grzałka ma się włączać już wtedy, gdy jest choć trochę za zimno
+    // i temperatura jest po lewej stronie optimum
+    lampControlState.heat =
+      cold > coldActivation && currentTemp < tempOptimalCenter;
   } else if (lampControlMode.light || lampControlMode.heat) {
     lampControlState.light = !!lampControlMode.light;
     lampControlState.heat = !!lampControlMode.heat;
@@ -302,40 +392,60 @@ function syncLampControl() {
   updateLampVisuals();
 }
 
-// Sterowanie światłem
+// Sterowanie światłem i ogrzewaniem
 function applyLampControl() {
   let currentLight = Number(light);
   let currentTemp = Number(temp);
 
-  // Zastosuj efekt rolety - zmniejsza światło o 50%
-  let shutterEffect = shutterActive ? 0.5 : 1.0;  // 0.5 = 50% światła (50% zmniejszenie)
+  // Ustawienia mocy
+  const shutterFactor = 0.8;   // roleta mniej tłumi światło
+  const lightPower = 36;       // mocniejsze doświetlanie
+  const heatPower = 15;       // mocniejsze grzanie
+  const brightReduction = 1;   // delikatniejsza redukcja przy nadmiarze światła
+  const hotReduction = 0.2;    // delikatniejsza redukcja temperatury
 
-  // Jeśli smart jest ON, ma priorytet
+  // Najpierw wpływ rolety na światło zastane / naturalne
+  let effectiveLight = currentLight * (shutterActive ? shutterFactor : 1.0);
+
   if (smartMode) {
-    if (lampControlState.light) {
-      currentLight = Math.min(100, currentLight + 26);
-    }
-    if (lampControlState.heat) {
-      currentTemp = Math.min(100, currentTemp + 6);
-    }
-  // Jeśli smart jest OFF, używaj manual override
+    // Membershipy fuzzy po uwzględnieniu rolety
+    const lightMap = getMembershipMap("light", effectiveLight);
+    const tempMap = getMembershipMap("temp", currentTemp);
+
+    const dark = lightMap["Ciemne"] ?? 0;
+    const bright = lightMap["Jasne"] ?? 0;
+
+    const cold = tempMap["Zimno"] ?? 0;
+    const hot = tempMap["Gorąco"] ?? 0;
+
+    // Im bardziej ciemno, tym mocniej świeci lampka
+    effectiveLight += dark * lightPower;
+
+    // Gdy naprawdę jasno, tylko lekko zmniejszamy bilans światła
+    effectiveLight -= bright * brightReduction;
+
+    // Im bardziej zimno, tym mocniej działa grzałka
+    currentTemp += cold * heatPower;
+
+    // Gdy gorąco, lekko ograniczamy temperaturę
+    currentTemp -= hot * hotReduction;
+  // Tryb manualny
   } else if (lampControlMode.light || lampControlMode.heat) {
     if (lampControlMode.light) {
-      currentLight = Math.min(100, currentLight + 8);
+      effectiveLight = Math.min(100, effectiveLight + lightPower);
     }
+
     if (lampControlMode.heat) {
-      currentTemp = Math.min(100, currentTemp + 1.5);
+      currentTemp = Math.min(50, currentTemp + heatPower);
     }
   }
 
-  // Aplikuj efekt rolety do światła
-  currentLight = currentLight * shutterEffect;
-
-  light = String(Math.round(currentLight));
-  temp = String(Number(currentTemp.toFixed(1)));
+  light = String(Math.round(clamp(effectiveLight, 0, 100)));
+  temp = String(Number(clamp(currentTemp, -25, 50).toFixed(1)));
 
   syncLampControl();
 }
+
 
 // Implementacja funkcji dla przycisków wentylatora i zraszacza
 function lampLight() { toggleLight(); }

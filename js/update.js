@@ -1,3 +1,5 @@
+// Plik update.js ma za zadanie aktualizować interferjs użytkownika.
+
 // Aktualizacja interfejsu użytkownika
 function updateUI() {
   document.getElementById("time").innerText = time;
@@ -40,7 +42,7 @@ function updateUI() {
 
   // Dzień / noc
   let day = triangle(time, 6, 12, 18);
-  sky.style.background = day > 0.6 ? "#74bcd4" : day > 0.2 ? "#a46d08" : "#333";
+  sky.style.background = day > 0.6 ? "#79b3c7" : day > 0.2 ? "#bc9243" : "#33353e";
 
   drawFuzzyChart();
 

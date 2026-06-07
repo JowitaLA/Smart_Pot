@@ -1,26 +1,75 @@
-// Plik z funkcją zmiany zakresów dla gry custom oraz aktualizacją roku w stopce.
+// Plik addons.js odpowiada za akcje poza symulatorem. Obejmuje on:
+// aktualizację roku w stopce, sterowania muzyką, zmiany zakresów dla rośliny i jej wybór, 
+// zmianę pory roku i czas jej trwania, ustawienie parametrów dla gry custom.
 
-// Ustaw aktualny rok w stopce
+// Ustawienie aktualnego roku w stopce
 const year = new Date().getFullYear();
 document.getElementById("year").textContent = year;
 
-// PRZYCISKI PONIŻEJ SYMULACJI --- tylko aktualizuj etykiety pod suwakami
-soilNewPlant.addEventListener("input", () => {
-  const el = document.getElementById("soilNewPlantVal");
-  if (el) el.innerText = soilNewPlant.value;
+// Start/stop muzyki
+const music = document.getElementById("bgMusic");
+const btn = document.getElementById("musicToggle");
+const icon = document.getElementById("iconPath");
+
+let isPlaying = true;
+
+// reakcja na start/stop
+btn.addEventListener("click", () => {
+  if (isPlaying) {
+    music.pause();
+    // Start
+    icon.setAttribute(
+      "d",
+      "M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814z",
+    );
+  } else {
+    music.play();
+
+    // Stop
+    icon.setAttribute(
+      "d",
+      "M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.25 5C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5m3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5",
+    );
+  }
+
+  isPlaying = !isPlaying;
 });
-lightNewPlant.addEventListener("input", () => {
-  const el = document.getElementById("lightNewPlantVal");
-  if (el) el.innerText = lightNewPlant.value;
-});
-tempNewPlant.addEventListener("input", () => {
-  const el = document.getElementById("tempNewPlantVal");
-  if (el) el.innerText = tempNewPlant.value;
-});
-healthNewPlant.addEventListener("input", () => {
-  const el = document.getElementById("healthNewPlantVal");
-  if (el) el.innerText = healthNewPlant.value;
-});
+
+// autoplay po pierwszym kliknięciu gdziekolwiek
+document.addEventListener(
+  "click",
+  () => {
+    music.play();
+    music.volume = 0.2;
+  },
+  { once: true },
+);
+
+// PRZYCISKI PONIŻEJ SYMULACJI - aktualizowanie etykiet pod suwakami
+if (soilNewPlant) {
+  soilNewPlant.addEventListener("input", () => {
+    const el = document.getElementById("soilNewPlantVal");
+    if (el) el.innerText = soilNewPlant.value;
+  });
+}
+if (lightNewPlant) {
+  lightNewPlant.addEventListener("input", () => {
+    const el = document.getElementById("lightNewPlantVal");
+    if (el) el.innerText = lightNewPlant.value;
+  });
+}
+if (tempNewPlant) {
+  tempNewPlant.addEventListener("input", () => {
+    const el = document.getElementById("tempNewPlantVal");
+    if (el) el.innerText = tempNewPlant.value;
+  });
+}
+if (healthNewPlant) {
+  healthNewPlant.addEventListener("input", () => {
+    const el = document.getElementById("healthNewPlantVal");
+    if (el) el.innerText = healthNewPlant.value;
+  });
+}
 
 // suwak dni
 days.addEventListener("input", () => {
@@ -78,10 +127,22 @@ function changeCustom() {
   customSeasonConfig.lightMax = parseInt(customLightMax.value, 10);
   customSeasonConfig.soilDrain = parseFloat(customSoilDrain.value);
 
-  const minTemp = Math.min(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
-  const maxTemp = Math.max(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
-  const minLight = Math.min(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
-  const maxLight = Math.max(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
+  const minTemp = Math.min(
+    customSeasonConfig.tempMin,
+    customSeasonConfig.tempMax,
+  );
+  const maxTemp = Math.max(
+    customSeasonConfig.tempMin,
+    customSeasonConfig.tempMax,
+  );
+  const minLight = Math.min(
+    customSeasonConfig.lightMin,
+    customSeasonConfig.lightMax,
+  );
+  const maxLight = Math.max(
+    customSeasonConfig.lightMin,
+    customSeasonConfig.lightMax,
+  );
 
   temp = (minTemp + Math.random() * (maxTemp - minTemp)).toFixed(1);
   light = String(Math.round(minLight + Math.random() * (maxLight - minLight)));
@@ -100,44 +161,58 @@ const customTempMin = document.getElementById("customTempMin");
 const customTempMax = document.getElementById("customTempMax");
 const tempRangeMin = document.getElementById("tempRangeMin");
 const tempRangeMax = document.getElementById("tempRangeMax");
-customTempMin.addEventListener("input", () => {
-  if (parseInt(customTempMin.value) > parseInt(customTempMax.value)) {
-    customTempMin.value = customTempMax.value;
-  }
-  tempRangeMin.textContent = customTempMin.value;
-});
-customTempMax.addEventListener("input", () => {
-  if (parseInt(customTempMax.value) < parseInt(customTempMin.value)) {
-    customTempMax.value = customTempMin.value;
-  }
-  tempRangeMax.textContent = customTempMax.value;
-});
+
+if (customTempMin && customTempMax && tempRangeMin) {
+  customTempMin.addEventListener("input", () => {
+    if (parseInt(customTempMin.value) > parseInt(customTempMax.value)) {
+      customTempMin.value = customTempMax.value;
+    }
+    tempRangeMin.textContent = customTempMin.value;
+  });
+}
+
+if (customTempMin && customTempMax && tempRangeMax) {
+  customTempMax.addEventListener("input", () => {
+    if (parseInt(customTempMax.value) < parseInt(customTempMin.value)) {
+      customTempMax.value = customTempMin.value;
+    }
+    tempRangeMax.textContent = customTempMax.value;
+  });
+}
 
 // Pobierz elementy input i label dla pobierania wody
 const customSoilDrain = document.getElementById("customSoilDrain");
 const soilDrainVal = document.getElementById("soilDrainVal");
-customSoilDrain.addEventListener("input", () => {
-  soilDrainVal.textContent = Number(customSoilDrain.value).toFixed(2);
-});
+
+if (customSoilDrain && soilDrainVal) {
+  customSoilDrain.addEventListener("input", () => {
+    soilDrainVal.textContent = Number(customSoilDrain.value).toFixed(2);
+  });
+}
 
 // Pobierz elementy input i label dla światła
 const customLightMin = document.getElementById("customLightMin");
 const customLightMax = document.getElementById("customLightMax");
 const lightRangeMin = document.getElementById("lightRangeMin");
 const lightRangeMax = document.getElementById("lightRangeMax");
-customLightMin.addEventListener("input", () => {
-  if (parseInt(customLightMin.value) > parseInt(customLightMax.value)) {
-    customLightMin.value = customLightMax.value;
-  }
-  lightRangeMin.textContent = customLightMin.value;
-});
-customLightMax.addEventListener("input", () => {
-  if (parseInt(customLightMax.value) < parseInt(customLightMin.value)) {
-    customLightMax.value = customLightMin.value;
-  }
-  lightRangeMax.textContent = customLightMax.value;
-});
 
+if (customLightMin && customLightMax && lightRangeMin) {
+  customLightMin.addEventListener("input", () => {
+    if (parseInt(customLightMin.value) > parseInt(customLightMax.value)) {
+      customLightMin.value = customLightMax.value;
+    }
+    lightRangeMin.textContent = customLightMin.value;
+  });
+}
+
+if (customLightMin && customLightMax && lightRangeMax) {
+  customLightMax.addEventListener("input", () => {
+    if (parseInt(customLightMax.value) < parseInt(customLightMin.value)) {
+      customLightMax.value = customLightMin.value;
+    }
+    lightRangeMax.textContent = customLightMax.value;
+  });
+}
 
 window.changePlant = changePlant;
 window.changeSeason = changeSeason;
