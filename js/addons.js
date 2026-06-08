@@ -105,13 +105,14 @@ function changeSeason(newSeason) {
   customSeasonActive = false;
   season = newSeason;
   changePlant(plant); // reset rośliny do domyślnej przy zmianie pory roku
+  const seasonName = season === "winter" ? "zimę" : season === "spring" ? "wiosnę" : season === "summer" ? "lato" : season === "autumn" ? "jesień" : season;
 
   time = 8; // czas
   totalDay = 0; // dzień
   seasonDay = 0; // reset liczby dni w sezonie
   msgSeason.innerText =
     "Zmieniono porę roku na " +
-    season +
+    seasonName +
     ".\nKażda pora roku będzie wynosić " +
     days.value +
     " dni.";

@@ -3,15 +3,22 @@
 
 // Sterowanie mocą światła dla danej pory roku
 function getSeasonLightPercent(seasonName, hour) {
-  const schedule = seasonLightSchedule[seasonName] || seasonLightSchedule.spring;
+  const schedule =
+    seasonLightSchedule[seasonName] || seasonLightSchedule.spring;
   const entry = schedule.find((item) => hour >= item.from && hour <= item.to);
   return entry ? entry.value : 0;
 }
 
 // Sterowanie mocą światła dla custom pory roku
 function getCustomLightPercent(hour) {
-  const minLight = Math.min(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
-  const maxLight = Math.max(customSeasonConfig.lightMin, customSeasonConfig.lightMax);
+  const minLight = Math.min(
+    customSeasonConfig.lightMin,
+    customSeasonConfig.lightMax,
+  );
+  const maxLight = Math.max(
+    customSeasonConfig.lightMin,
+    customSeasonConfig.lightMax,
+  );
 
   // Sterowanie mocy światła ze wzgledu na godzinę
   if (hour >= 0 && hour <= 4) return 0;
@@ -30,8 +37,14 @@ function randomSeasonTemperature(seasonName) {
 
 // Losowanie temperatury dla custom pory roku
 function randomCustomTemperature() {
-  const minTemp = Math.min(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
-  const maxTemp = Math.max(customSeasonConfig.tempMin, customSeasonConfig.tempMax);
+  const minTemp = Math.min(
+    customSeasonConfig.tempMin,
+    customSeasonConfig.tempMax,
+  );
+  const maxTemp = Math.max(
+    customSeasonConfig.tempMin,
+    customSeasonConfig.tempMax,
+  );
   return minTemp + Math.random() * (maxTemp - minTemp);
 }
 
@@ -95,12 +108,14 @@ function nextSeason() {
     season = seasons[nextIndex];
     seasonDay = 0;
 
-    msgSeason.innerText = "Nastała pora roku: " + season;
+    const seasonName = season === "winter" ? "zima" : season === "spring" ? "wiosna" : season === "summer" ? "lato" : season === "autumn" ? "jesień" : season;
+
+    msgSeason.innerText = "Nastała pora roku: " + seasonName;
     msgSeason.style.background = "var(--primary-color)";
   }
 }
 
-// 
+//
 function step(timeStep) {
   for (let i = 0; i < timeStep; i++) {
     // Najpierw działa środowisko naturalne
@@ -140,12 +155,11 @@ function step(timeStep) {
       ruleTempCold,
       ruleTempHot,
       ruleDarkInDay,
-      ruleBrightAtNight
+      ruleBrightAtNight,
     );
 
-    
     // REGUŁY DOBROSTANU
-    
+
     // Dobre warunki w dzień:
     // - gleba optymalna
     // - temperatura optymalna
@@ -159,7 +173,6 @@ function step(timeStep) {
 
     const good = Math.max(goodDay, goodNight);
 
-    
     // DECYZJA / UPROSZCZONA DEFUZYFIKACJA
 
     // Złe warunki obniżają zdrowie mocniej,
@@ -168,9 +181,8 @@ function step(timeStep) {
 
     health = Number(clamp(health + change, 0, 100).toFixed(1));
 
-    
     // KOMUNIKAT STANU
-    
+
     const balance = good - bad;
 
     if (balance < -0.35) {
@@ -184,9 +196,8 @@ function step(timeStep) {
       msgState.style.background = "#5c832a";
     }
 
-    
     // CZAS
-    
+
     time = (time + 1) % 24;
 
     if (time === 0) {
